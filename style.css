@@ -1,0 +1,51 @@
+.paperOverlay {
+	background-position : 0 0;
+    background-repeat: repeat;
+}
+
+header {
+	height : 150px;
+	padding : 20px 20px 20px;
+}
+
+.logo {
+	height:50%;
+}
+
+footer {
+	position : fixed;
+	left : 0;
+	bottom : 0;
+	width : 100%;
+	background-color : GhostWhite;
+	text-align : center;
+	padding : 5px;
+}
+
+ul {
+	list-style-type: none;
+    margin: 0;
+    padding: 0;
+	position: fixed;
+    top: 0;
+    width: 100%;
+	overflow: hidden;
+    background-color: #333;
+}
+
+li {
+	display : inline;
+	float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #111;
+}
