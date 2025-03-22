@@ -1,78 +1,69 @@
-body {
+body{
 	background-image: url("img/bg.png");
-	background-position : 0 0;
-    background-repeat: repeat;
     font-family: Georgia, serif;
 }
-header {
+header{
     display: flex;
 }
-.pnr {
+.pnr{
     display: flex;
     align-items: center;
 }
-.pnr h1 {
-    margin-left: 10px;
-}
-.navigation {
+.navigation{
     display: flex;
     width: 100%;
-    justify-content: space-between;
     align-items: center;
+	flex-wrap: nowrap;
+    overflow-x: auto;
 }
-.nav-left, .nav-right {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.nav-left, .nav-right{
+	display: contents;
+	list-style: none;
 }
-.nav-left li {
-    margin-right: 20px;
+.nav-left li{
+    margin-right: 1.3em;
 }
-.pnr h1 {
-    margin-left: 10px;
+.pnr h1{
+    margin-left: 0.5em;
 }
-.nav-right {
-      margin-left: auto;
-}
-.navigation li:hover {
+.navigation li:hover{
     background-color: #e6e6e6;
-	border-radius: 10px;
+	border-radius: 1.5em;
 }
-.navigation a {
+.navigation a{
 	float: left;
-	padding: 12px;
-    font-size: 18px;
-    line-height: 25px;
-    border-radius: 10px;
+	padding: 0.6em;
+    font-size: 1.2em;
+    line-height: 1.6em;
+    border-radius: 0.6em;
 	color: #00936f;
 	text-decoration: none;
-	display : flex;
+	display: flex;
+	text-align: center;
+	align-items : center;
 }
-.icon {
-	margin-right: 10px;
+.icon{
+	margin-right: 0.6em;
 }
-.navigation li.active {
+.navigation li.active{
     background-color: #eab7f0;
-	border-radius: 10px;
+	border-radius: 1.5em;
 }
-.navigation li.active a {
+.navigation li.active a{
 	color:white;
 }
-.pnr img {
-    max-width: 60px;
-    float: left;
-    margin-right: 10px;
+.pnr img{
+    max-width: 4em;
 }
-footer {
+footer{
 	position: fixed;
 	left: 0;
 	bottom: 0;
 	width: 100%;
 	text-align: center;
-	padding: 5px;
+	padding: 0.3em;
 }
-a[href]:not([class]) {
+a[href]:not([class]){
     color: #00936f;
     text-decoration: none;
 }
