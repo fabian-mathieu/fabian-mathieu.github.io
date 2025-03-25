@@ -14,9 +14,9 @@ width:100%}
 .ul li a{margin-right:1em;}
 .pnr h1{margin-left:0.5em;}
 .nav :hover{
-background-color:#e6e6e6;
+background-color:#05050524;
 border-radius:1.5em;}
-.nav li a{
+li a{
 float:left;
 padding:0.6em;
 font-size:1.2em;
@@ -24,9 +24,9 @@ line-height:1.6em;
 border-radius:0.6em;
 color:#00936f;
 text-decoration:none;}
-.nav li a img{margin-right:0.5em;}
-.nav li.active a{
-background-color:#eab7f0;
+li a img{margin-right:0.5em;}
+li.active a{
+background-color:#df41f157;
 border-radius:1.5em;
 color:white;}
 footer{
