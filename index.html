@@ -58,7 +58,7 @@
            opacity: 1,
            color: 'white',
            dashArray: '3',
-           fillOpacity: 0.5,
+           fillOpacity: 0.6,
            fillColor: '#448aff'
            };
         }
@@ -94,12 +94,14 @@
         info.update(layer.feature.properties);
       }
 
-        function resetHighlight(e) {
-          info.update();
-        }
+      function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        info.update(); // Pour effacer les infos
+      }
+	  
         function onEachFeature(feature, layer) {
           layer.on({
-            mousein: highlightFeature,
+            mouseover: highlightFeature,
             mouseout: resetHighlight
           });
         }
