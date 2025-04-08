@@ -9,137 +9,172 @@
   <title>Dataviz</title>
   <link rel="icon" type="image/x-icon" href="img/icon.png">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" >
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"> </script>
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
+
 <body>
   <header>
-    <div class="pnr"><a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
+    <div class="pnr">
+      <a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
       <h1><a href="index.html">Dataviz : la répartition des groupes musicaux en France</a></h1>
     </div>
     <nav class="nav">
       <ul class="ul">
         <li class="active"><a href="index.html"><img src="img/geo_white.svg" width="16" height="16">Carte</a></li>
-		<li><a href="infographie.html"><img src="img/graph_blue.svg" width="16" height="16">Infographie</a></li>
-		<li><a href="dataviz.html"><img src="img/chart_blue.svg" width="16" height="16">Dataviz</a></li>
+        <li><a href="infographie.html"><img src="img/graph_blue.svg" width="16" height="16">Infographie</a></li>
+        <li><a href="dataviz.html"><img src="img/chart_blue.svg" width="16" height="16">Dataviz</a></li>
         <li><a href="a_propos.html"><img src="img/info_blue.svg" width="16" height="16">À propos</a></li>
       </ul>
     </nav>
   </header>
+
   <main>
-    <h1> Visualisation des groupes musicaux actifs listés sur MusicBrainz.org </h1>
-	<div id="mymap"></div>
-	  <script>
-	    // fond de carte
-	    var mymap = L.map('mymap', {center: [47.1359, 2.12495], zoom: 6});
-	    var baselayers = {
-	    fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),
-	    fond_carto: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution: '<a href="https://carto.com/basemaps">cartocdn</a>'}).addTo(mymap)};
-	    baselayers.fond_carto.addTo(mymap);
-	    L.control.scale().addTo(mymap);
-	    L.control.layers(baselayers, null, {position:'topright'}, {collapsed: false}).addTo(mymap);
+    <h1>Visualisation des groupes musicaux actifs listés sur MusicBrainz.org</h1>
 
-        // ajout données carte
-	    fetch('data_leaflet/villes_avec_groupes.geojson')
-       .then(response => response.json())
-       .then(data => {
-        L.geoJson(data, {
-        style: style,
-        onEachFeature: onEachFeature
-        }).addTo(mymap);
+    <label for="genre-filter" style="margin-left:2%;">Filtrer par genre :</label>
+    <select id="genre-filter">
+      <option value="">Tous les genres</option>
+    </select>
+
+    <div id="mymap"></div>
+
+    <script>
+      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 6 });
+
+      var baselayers = {
+        fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }),
+        fond_carto: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '<a href="https://carto.com/basemaps">cartocdn</a>'
         })
-       .catch(error => console.error('Erreur lors du chargement du GeoJSON:', error));
+      };
+      baselayers.fond_carto.addTo(mymap);
 
-       function style(feature) {
-         const nbGroupes = feature.properties.groupes ? feature.properties.groupes.length : 0;
-         return {
-           weight: 0.5,
-           opacity: 1,
-           color: 'white',
-           dashArray: '3',
-           fillOpacity: 0.6,
-           fillColor: '#448aff'
-           };
-        }
-	   
-	   // panneau de statistiques
-       var info = L.control();
-       info.onAdd = function (map) {
-         this._div = L.DomUtil.create('div', 'info');
-         this.update();
-         return this._div;
+      L.control.scale().addTo(mymap);
+      L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
+
+      let genreActif = "";
+      let geojson;
+
+      document.getElementById('genre-filter').addEventListener('change', function () {
+        genreActif = this.value;
+      });
+
+      function style(feature) {
+        const nbGroupes = feature.properties.groupes ? feature.properties.groupes.length : 0;
+        return {
+          weight: 0.5,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: 0.6,
+          fillColor: '#448aff'
         };
-            
+      }
+
+      var info = L.control();
+      info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+      };
+
       info.update = function (props) {
-  if (!props) {
-    this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
-    return;
-  }
+        if (!props) {
+          this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
+          return;
+        }
 
-  let groupesHTML = '';
-  if (props.groupes && props.groupes.length > 0) {
-    // Séparer les groupes avec et sans année
-    const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
-    const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
+        let groupesHTML = '';
+        if (props.groupes && props.groupes.length > 0) {
+          const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
+          const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
 
-    // Trier ceux avec année (décroissant)
-    avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+          avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+          sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
 
-    // Trier ceux sans année (alphabétique)
-    sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
+          const groupesTries = [...avecAnnee, ...sansAnnee];
 
-    // Fusionner
-    const groupesTries = [...avecAnnee, ...sansAnnee];
+          const groupesFiltres = groupesTries.filter(g =>
+            !genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
+          );
 
-    groupesHTML = '<b>Groupes :</b><br>' + groupesTries.map(g => `
-      <div style="margin-bottom: 0.5em;">
-        <span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
-        <span style="font-style:italic;">${g.tags}</span>
-      </div>
-    `).join('');
-  } else {
-    groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
-  }
+          groupesHTML = '<b>Groupes :</b><br>' + groupesFiltres.map(g => `
+            <div style="margin-bottom: 0.5em;">
+              <span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
+              <span style="font-style:italic;">${g.tags}</span>
+            </div>
+          `).join('');
 
-  this._div.innerHTML = `
-    <h4>Statistiques locales</h4>
-    <b>Commune :</b> ${props.NOM}<br>
-    <b>Population :</b> ${props.POPULATION} habitants<br>
-    <b>Statut :</b> ${props.STATUT}<br><br>
-    ${groupesHTML}
-  `;
-};
+          if (groupesFiltres.length === 0) {
+            groupesHTML += '<i>Aucun groupe pour ce genre.</i>';
+          }
+        } else {
+          groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
+        }
 
+        this._div.innerHTML = `
+          <h4>Statistiques locales</h4>
+          <b>Commune :</b> ${props.NOM}<br>
+          <b>Population :</b> ${props.POPULATION} habitants<br>
+          <b>Statut :</b> ${props.STATUT}<br><br>
+          ${groupesHTML}
+        `;
+      };
       info.addTo(mymap);
-	
+
       function highlightFeature(e) {
-        var layer = e.target;     
+        var layer = e.target;
         layer.setStyle({
-            weight: 3,
-            color: '#FFFFFF',
-            dashArray: '',
-            fillOpacity: 0.7
+          weight: 3,
+          color: '#FFFFFF',
+          dashArray: '',
+          fillOpacity: 0.7
         });
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        } 
+          layer.bringToFront();
+        }
         info.update(layer.feature.properties);
       }
 
       function resetHighlight(e) {
         geojson.resetStyle(e.target);
-        info.update(); // Pour effacer les infos
+        info.update();
       }
-	  
-        function onEachFeature(feature, layer) {
-          layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight
+
+      function onEachFeature(feature, layer) {
+        layer.on({
+          mouseover: highlightFeature,
+          mouseout: resetHighlight
+        });
+      }
+
+      // Chargement du GeoJSON
+      fetch('data_leaflet/villes_avec_groupes.geojson')
+        .then(response => response.json())
+        .then(data => {
+          geojson = L.geoJson(data, {
+            style: style,
+            onEachFeature: onEachFeature
+          }).addTo(mymap);
+
+          const genreSet = new Set();
+          data.features.forEach(f => {
+            f.properties.groupes.forEach(g => {
+              g.tags.split(',').forEach(tag => genreSet.add(tag.trim()));
+            });
           });
-        }
-		
-		
+
+          const select = document.getElementById('genre-filter');
+          [...genreSet].sort().forEach(tag => {
+            const opt = document.createElement('option');
+            opt.value = tag;
+            opt.textContent = tag;
+            select.appendChild(opt);
+          });
+        });
     </script>
   </main>
 </body>
