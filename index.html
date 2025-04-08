@@ -72,33 +72,45 @@
         };
             
       info.update = function (props) {
-        if (!props) {
-          this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
-          return;
-        }
-      let groupesHTML = '';
-      if (props.groupes && props.groupes.length > 0) {
-        // Tri des groupes par année décroissante
-        const groupesTries = props.groupes.slice().sort((a, b) => {
-        return parseInt(b.annee) - parseInt(a.annee);
-      });
-      groupesHTML = '<b>Groupes :</b><br>' + groupesTries.map(g => `
+  if (!props) {
+    this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
+    return;
+  }
+
+  let groupesHTML = '';
+  if (props.groupes && props.groupes.length > 0) {
+    // Séparer les groupes avec et sans année
+    const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
+    const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
+
+    // Trier ceux avec année (décroissant)
+    avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+
+    // Trier ceux sans année (alphabétique)
+    sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
+
+    // Fusionner
+    const groupesTries = [...avecAnnee, ...sansAnnee];
+
+    groupesHTML = '<b>Groupes :</b><br>' + groupesTries.map(g => `
       <div style="margin-bottom: 0.5em;">
-        <span style="font-weight:bold;">• ${g.nom}</span> <span style="color:#777;">(${g.annee})</span><br>
+        <span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
         <span style="font-style:italic;">${g.tags}</span>
       </div>
-      `).join('');
-      } else {
-        groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
-      }
-    this._div.innerHTML = `
-      <h4>Statistiques locales</h4>
-      <b>Commune :</b> ${props.NOM}<br>
-      <b>Population :</b> ${props.POPULATION} habitants<br>
-      <b>Statut :</b> ${props.STATUT}<br><br>
-      ${groupesHTML}
-    `;
-    };
+    `).join('');
+  } else {
+    groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
+  }
+
+  this._div.innerHTML = `
+    <h4>Statistiques locales</h4>
+    <b>Commune :</b> ${props.NOM}<br>
+    <b>Population :</b> ${props.POPULATION} habitants<br>
+    <b>Statut :</b> ${props.STATUT}<br><br>
+    ${groupesHTML}
+  `;
+};
+
       info.addTo(mymap);
 	
       function highlightFeature(e) {
