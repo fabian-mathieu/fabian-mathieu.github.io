@@ -12,3 +12,4 @@ li.active a{background-color:#4488ff91; border-radius:1.5em; color:white;}
 header h1 a{color:#448aff; text-decoration:none;}
 main h1{font-size:150%; color:#5d6d7e; margin-left:2%;}
 #mymap{position:absolute;height:80%;width:95%;margin-left:2%;}
+.info {background:white;padding:10px;border-radius:8px;box-shadow: 0 0 5px #ccc;max-height:400px;overflow-y:auto;font-size:90%;}
