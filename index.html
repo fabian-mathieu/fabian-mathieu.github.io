@@ -71,12 +71,30 @@
          return this._div;
         };
             
-      info.update = function (props) {
-        this._div.innerHTML = '<h4>Statistiques locales</h4>' +  (props ? 
-        `<b>Commune :</b> ${props.NOM}<br>
-        <b>Population :</b> ${props.POPULATION} habitants<br>
-        <b>Groupes :</b> ${props.groupes.length}` : 'Survolez une commune');
-      };
+		info.update = function (props) {
+		  if (!props) {
+			this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
+			return;
+		  }
+
+		  let groupesHTML = '';
+		  if (props.groupes && props.groupes.length > 0) {
+			groupesHTML = '<b>Groupes :</b><br>' + props.groupes.map(g => `
+			  <span style="font-weight:bold;">• ${g.nom}</span><br>
+			  <span style="font-style:italic; font-size:90%;">${g.tags}</span><br>
+			`).join('');
+		  } else {
+			groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
+		  }
+
+		  this._div.innerHTML = `
+			<h4>Statistiques locales</h4>
+			<b>Commune :</b> ${props.NOM}<br>
+			<b>Population :</b> ${props.POPULATION} habitants<br>
+			<b>Statut :</b> ${props.STATUT}<br><br>
+			${groupesHTML}
+		  `;
+		};
 	  
       info.addTo(mymap);
 	
