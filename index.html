@@ -58,20 +58,10 @@
            opacity: 1,
            color: 'white',
            dashArray: '3',
-           fillOpacity: 0.8,
-           fillColor: getColor(nbGroupes)
+           fillOpacity: 0.5,
+           fillColor: #448aff
            };
         }
-		
-       function getColor(d) {
-         return d > 10 ? '#800026' :
-           d > 7  ? '#BD0026' :
-           d > 5  ? '#E31A1C' :
-           d > 3  ? '#FC4E2A' :
-           d > 1  ? '#FD8D3C' :
-           d === 1 ? '#FEB24C' :
-                    '#FFEDA0';
-       }
 	   
 	   // panneau de statistiques
        var info = L.control();
@@ -87,13 +77,22 @@
         <b>Population :</b> ${props.POPULATION} habitants<br>
         <b>Groupes :</b> ${props.groupes.length}` : 'Survolez une commune');
       };
-
-        info.addTo(mymap);
+	  
+      info.addTo(mymap);
 	
-        function highlightFeature(e) {
-          var layer = e.target;
-          info.update(layer.feature.properties);
-        }   
+      function highlightFeature(e) {
+        var layer = e.target;     
+        layer.setStyle({
+            weight: 3,
+            color: '#111',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        } 
+        info.update(layer.feature.properties);
+      }
 
         function resetHighlight(e) {
           info.update();
@@ -104,6 +103,8 @@
             mouseout: resetHighlight
           });
         }
+		
+		
     </script>
   </main>
 </body>
