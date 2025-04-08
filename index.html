@@ -31,7 +31,7 @@
     <h1> Visualisation des groupes musicaux actifs listés sur MusicBrainz.org </h1>
 	<div id="mymap"></div>
 	  <script>
-	  // fond de carte
+	    // fond de carte
 	    var mymap = L.map('mymap', {center: [47.1359, 2.12495], zoom: 6});
 	    var baselayers = {
 	    fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'}),
@@ -40,39 +40,38 @@
 	    L.control.scale().addTo(mymap);
 	    L.control.layers(baselayers, null, {position:'topright'}, {collapsed: false}).addTo(mymap);
 
-      // ajout données carte
-	  fetch('data_leaflet/villes_avec_groupes.geojson')
-     .then(response => response.json())
-     .then(data => {
-      L.geoJson(data, {
-      style: style,
-      onEachFeature: onEachFeature
-      }).addTo(mymap);
-      })
-     .catch(error => console.error('Erreur lors du chargement du GeoJSON:', error));
+        // ajout données carte
+	    fetch('data_leaflet/villes_avec_groupes.geojson')
+       .then(response => response.json())
+       .then(data => {
+        L.geoJson(data, {
+        style: style,
+        onEachFeature: onEachFeature
+        }).addTo(mymap);
+        })
+       .catch(error => console.error('Erreur lors du chargement du GeoJSON:', error));
 
-	   
-	    function style(feature) {
-          return {
-          weight: 0.5,
-          opacity: 1,
-          color: 'white',
-          dashArray: '3',
-          fillOpacity: 0.8,
-          fillColor: 'black'
-          };
-        } 
-	  
-	  // panneau de statistiques
-        var info = L.control();
-        info.onAdd = function (map) {
-          this._div = L.DomUtil.create('div', 'info');
-          this.update();
-          return this._div;
+       function style(feature) {
+         return {
+         weight: 0.5,
+         opacity: 1,
+         color: 'white',
+         dashArray: '3',
+         fillOpacity: 0.8,
+         fillColor: 'blue'
          };
+       } 
+	   
+	   // panneau de statistiques
+       var info = L.control();
+       info.onAdd = function (map) {
+         this._div = L.DomUtil.create('div', 'info');
+         this.update();
+         return this._div;
+        };
             
-        info.update = function (props) {
-        this._div.innerHTML = '<h4>Statistiques locales</h4>' +  (props ?
+       info.update = function (props) {
+         this._div.innerHTML = '<h4>Statistiques locales</h4>' +  (props ?
           '<b>Commune :<br>' + props.NOM.substr(8) + '</b><br><br>' + 'Population : ' + props.POPULATION + ' habitants '
 		  + 'Statut : ' + props.STATUT : 'Stats'
           );
