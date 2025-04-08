@@ -52,15 +52,26 @@
        .catch(error => console.error('Erreur lors du chargement du GeoJSON:', error));
 
        function style(feature) {
+         const nbGroupes = feature.properties.groupes ? feature.properties.groupes.length : 0;
          return {
-         weight: 0.5,
-         opacity: 1,
-         color: 'white',
-         dashArray: '3',
-         fillOpacity: 0.8,
-         fillColor: 'blue'
-         };
-       } 
+           weight: 0.5,
+           opacity: 1,
+           color: 'white',
+           dashArray: '3',
+           fillOpacity: 0.8,
+           fillColor: getColor(nbGroupes)
+           };
+        }
+		
+       function getColor(d) {
+         return d > 10 ? '#800026' :
+           d > 7  ? '#BD0026' :
+           d > 5  ? '#E31A1C' :
+           d > 3  ? '#FC4E2A' :
+           d > 1  ? '#FD8D3C' :
+           d === 1 ? '#FEB24C' :
+                    '#FFEDA0';
+       }
 	   
 	   // panneau de statistiques
        var info = L.control();
@@ -70,12 +81,13 @@
          return this._div;
         };
             
-       info.update = function (props) {
-         this._div.innerHTML = '<h4>Statistiques locales</h4>' +  (props ?
-          '<b>Commune :<br>' + props.NOM.substr(8) + '</b><br><br>' + 'Population : ' + props.POPULATION + ' habitants '
-		  + 'Statut : ' + props.STATUT : 'Stats'
-          );
-        };
+      info.update = function (props) {
+        this._div.innerHTML = '<h4>Statistiques locales</h4>' +  (props ? 
+        `<b>Commune :</b> ${props.NOM}<br>
+        <b>Population :</b> ${props.POPULATION} habitants<br>
+        <b>Groupes :</b> ${props.groupes.length}` : 'Survolez une commune');
+      };
+
         info.addTo(mymap);
 	
         function highlightFeature(e) {
