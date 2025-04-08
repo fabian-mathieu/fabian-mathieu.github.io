@@ -11,4 +11,4 @@ li a img{margin-right:0.5em;}
 li.active a{background-color:#4488ff91; border-radius:1.5em; color:white;}
 header h1 a{color:#448aff; text-decoration:none;}
 main h1{font-size:150%; color:#5d6d7e; margin-left:2%;}
-#map{position:absolute;height:80%;width:95%;margin-left:2%;}
+#mymap{position:absolute;height:80%;width:95%;margin-left:2%;}
