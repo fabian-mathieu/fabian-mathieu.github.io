@@ -175,6 +175,7 @@
 		  content += `Statut : ${props.STATUT}<br><br>`;
 		  if (groupesFiltres.length > 0) {
 			content += '<b>Groupes :</b><br>';
+			content += `<div style="max-height: 300px; overflow-y: auto; padding-right: 5px;">`;
 			content += groupesFiltres.map(g => `
 			  <div style="margin-bottom: 0.5em;">
 				<span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
