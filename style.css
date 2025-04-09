@@ -6,10 +6,10 @@ header{display:flex; align-items:center;}
 .ul li a{margin-right:1em;}
 .pnr h1{margin-left:0.5em;}
 .nav :hover{background-color:#05050524; border-radius:1.5em;}
-li a{float:left; padding:1%; font-size:120%; line-height:160%; border-radius:60%; color:#448aff; text-decoration:none;}
+li a{float:left; padding:0.6em; font-size:1.2em; line-height:1.6em; border-radius:0.6em; color:#448aff; text-decoration:none;}
 li a img{margin-right:0.5em;}
 li.active a{background-color:#4488ff91; border-radius:1.5em; color:white;}
 header h1 a{color:#448aff; text-decoration:none;}
 main h1{font-size:150%; color:#5d6d7e; margin-left:2%;}
-#mymap{position:absolute;height:80%;width:95%;margin-left:2%;}
+#mymap{position:absolute;height:75%;width:95%;margin-left:2%;}
 .info {background:white;padding:0px 10px;border-radius:8px;box-shadow: 0 0 5px #ccc;max-height:400px;overflow-y:auto;max-width:300px;}
