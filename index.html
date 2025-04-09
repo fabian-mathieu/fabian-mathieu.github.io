@@ -144,12 +144,48 @@
         info.update();
       }
 
-      function onEachFeature(feature, layer) {
-        layer.on({
-          mouseover: highlightFeature,
-          mouseout: resetHighlight
-        });
-      }
+		function onEachFeature(feature, layer) {
+		  layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: function (e) {
+			  layer.bindPopup(getPopupContent(feature.properties)).openPopup();
+			}
+		  });
+		}
+		
+		function getPopupContent(props) {
+		  let content = '';
+
+		  if (!props) return '';
+
+		  const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
+		  const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
+
+		  avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+		  sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
+
+		  const groupesTries = [...avecAnnee, ...sansAnnee];
+
+		  const groupesFiltres = groupesTries.filter(g =>
+			!genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
+		  );
+		  content += `<strong>${props.NOM}</strong><br>`;
+		  content += `Population : ${props.POPULATION} habitants<br>`;
+		  content += `Statut : ${props.STATUT}<br><br>`;
+		  if (groupesFiltres.length > 0) {
+			content += '<b>Groupes :</b><br>';
+			content += groupesFiltres.map(g => `
+			  <div style="margin-bottom: 0.5em;">
+				<span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
+				<span style="font-style:italic;">${g.tags}</span>
+			  </div>
+			`).join('');
+		  } else {
+			content += '<i>Aucun groupe pour ce genre.</i>';
+		  }
+		  return content;
+		}
 
       // Chargement du GeoJSON
       fetch('data_leaflet/villes_avec_groupes.geojson')
