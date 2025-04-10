@@ -256,13 +256,12 @@
 
 // Lignes horizontales (corrigé)
 svgLollipop.selectAll("line")
-  .data(dataLollipop)
-  .enter()
-  .append("line")
-    .attr("x1", xLollipop(0)) // part de 0
-    .attr("x2", d => xLollipop(d.nb_groupes)) // va jusqu'à la valeur
-    .attr("y1", d => yLollipop(d.name))
-    .attr("y2", d => yLollipop(d.name))
+      .data(dataLollipop)
+      .join("line")
+      .attr("y1", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
+      .attr("y2", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
+      .attr("x1", 0)
+      .attr("x2", d => xLollipop(d.nb_groupes))
     .attr("stroke", "#ccc");
 
 // Cercles (corrigé)
