@@ -13,53 +13,6 @@
   <script src="https://d3js.org/d3.v7.js"></script>
 </head>
 
-<script>
-  const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-  const width = 900 - margin.left - margin.right;
-  const height = 500 - margin.top - margin.bottom;
-
-  const svg = d3.select("#chart_annee")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
-    data.forEach(d => {
-      d.annee = +d.annee;
-      d.nb_artistes = +d.nb_artistes;
-    });
-
-    const x = d3.scaleBand()
-      .domain(data.map(d => d.annee))
-      .range([0, width])
-      .padding(0.1);
-
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.nb_artistes)]).nice()
-      .range([height, 0]);
-
-    svg.append("g").call(d3.axisLeft(y));
-
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
-      .selectAll("text")
-      .attr("transform", "rotate(-45)")
-      .style("text-anchor", "end");
-
-    svg.selectAll("rect")
-      .data(data)
-      .join("rect")
-      .attr("x", d => x(d.annee))
-      .attr("y", d => y(d.nb_artistes))
-      .attr("width", x.bandwidth())
-      .attr("height", d => height - y(d.nb_artistes))
-      .attr("fill", "#448aff");
-  });
-</script>
-
 <body>
   <header>
     <div class="pnr"><a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
@@ -79,6 +32,53 @@
 	<h2>Nombre d'artistes français ajoutés selon leur année de naissance ou de formation</h2>
     <div id="chart_annee" style="margin-left:2%; width:90%; height:500px;"></div>
   </main>
+	<script>
+	  const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+	  const width = 900 - margin.left - margin.right;
+	  const height = 500 - margin.top - margin.bottom;
+
+	  const svg = d3.select("#chart_annee")
+		.append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", `translate(${margin.left},${margin.top})`);
+
+	  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
+		data.forEach(d => {
+		  d.annee = +d.annee;
+		  d.nb_artistes = +d.nb_artistes;
+		});
+
+		const x = d3.scaleBand()
+		  .domain(data.map(d => d.annee))
+		  .range([0, width])
+		  .padding(0.1);
+
+		const y = d3.scaleLinear()
+		  .domain([0, d3.max(data, d => d.nb_artistes)]).nice()
+		  .range([height, 0]);
+
+		svg.append("g").call(d3.axisLeft(y));
+
+		svg.append("g")
+		  .attr("transform", `translate(0,${height})`)
+		  .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
+		  .selectAll("text")
+		  .attr("transform", "rotate(-45)")
+		  .style("text-anchor", "end");
+
+		svg.selectAll("rect")
+		  .data(data)
+		  .join("rect")
+		  .attr("x", d => x(d.annee))
+		  .attr("y", d => y(d.nb_artistes))
+		  .attr("width", x.bandwidth())
+		  .attr("height", d => height - y(d.nb_artistes))
+		  .attr("fill", "#448aff");
+	  });
+	</script>
 </body>
+
 
 </html>
