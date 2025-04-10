@@ -207,7 +207,7 @@
 
     // === LOLLIPOP CHART ===
     const lollipopMargin = { top: 20, right: 30, bottom: 100, left: 150 },
-          lollipopWidth = 960 - lollipopMargin.left - lollipopMargin.right,
+          lollipopWidth = 1500 - lollipopMargin.left - lollipopMargin.right,
           lollipopHeight = 500 - lollipopMargin.top - lollipopMargin.bottom;
 
     const svgLollipop = d3.select("#lollipop")
@@ -235,7 +235,7 @@
 
 const xLollipop = d3.scaleLinear()
   .domain([0, d3.max(dataLollipop, d => d.nb_groupes)])
-  .range([0, lollipopWidth]); // aussi corriger width => lollipopWidth ici
+  .range([0, lollipopWidth]);
 
 
     const yLollipop = d3.scaleBand()
@@ -280,8 +280,7 @@ svgLollipop.selectAll("circle")
     .on("mouseout", () => {
       tooltipLollipop.style("visibility", "hidden");
     });
-
-
+	
     // === TOGGLE BUTTON ===
     const toggleButton = document.getElementById("toggleView");
     let showingWordcloud = true;
