@@ -1,0 +1,93 @@
+-- retourne l'id de la france
+select area.id -- id France : 73
+from musicbrainz_db.musicbrainz.area
+where area.name = 'France'
+
+-- retourne les artistes situés en france
+select artist.id, artist.name
+from musicbrainz_db.musicbrainz.artist
+where artist.area = '73' and artist.ended = 'false' and artist.type = 2 --2 : correspond aux groupes
+
+-- test : retourne les infos d'un artiste
+select * -- Razor : id = '54055'
+from musicbrainz_db.musicbrainz.artist
+where artist.name = 'Razor'
+
+select artist.id, artist.name, tag.id as tag_id, tag.name as tag
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.tag, musicbrainz_db.musicbrainz.artist_tag
+where artist.id = '54055' and artist.id = artist_tag.artist and artist_tag.tag = tag.id
+
+select artist.id, artist.name as nom_groupe, tag.id as tag_id, tag.name as tag, area.name as localisation, area."type" as localisation_type, artist.begin_date_year
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.tag, musicbrainz_db.musicbrainz.artist_tag, musicbrainz_db.musicbrainz.area
+where artist.area = '73' and artist.ended = 'false' and artist.type = 2 -- 73 : est localisé en france, 2 : correspond aux groupes
+and artist.id = artist_tag.artist and artist_tag.tag = tag.id -- récupère les genres
+and artist.begin_area = area.id
+
+-- retourne les artites fr et leurs tags
+select artist.id, artist.name as nom_groupe, STRING_AGG(tag.name, ', ') as tags, area.name as localisation, area."type" as localisation_type, artist.begin_date_year
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.tag, musicbrainz_db.musicbrainz.artist_tag, musicbrainz_db.musicbrainz.area
+where artist.area = '73' and artist.ended = 'false' and artist.type = 2 -- 73 : est localisé en france, 2 : correspond aux groupes
+and artist.id = artist_tag.artist and artist_tag.tag = tag.id -- récupère les genres
+and artist.begin_area = area.id
+group by artist.id, area.name, area."type" 
+
+-- idem avec les artistes solos en +
+select artist.id, artist.name as nom_groupe, area.name as localisation, area."type" as localisation_type, artist.begin_date_year, artist.type as type
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.tag, musicbrainz_db.musicbrainz.artist_tag, musicbrainz_db.musicbrainz.area
+where artist.area = '73' and artist.ended = 'false' -- 73 : est localisé en france
+and artist.id = artist_tag.artist-- récupère les genres
+and artist.begin_area = area.id
+group by artist.id, area.name, area."type" 
+
+-- retourne les tags les + fréquemment donnés pour les artistes fr
+select tag.name, COUNT(distinct artist.id) as nb_groupes
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.tag, musicbrainz_db.musicbrainz.artist_tag, musicbrainz_db.musicbrainz.area
+where artist.area = '73' and artist.ended = 'false' and artist.type = 2 -- 73 : est localisé en france, 2 : correspond aux groupes
+and artist.id = artist_tag.artist and artist_tag.tag = tag.id -- récupère les genres
+and artist.begin_area = area.id
+group by tag.name
+order by COUNT(distinct artist.id) desc
+
+-- retourne le nb d'artistes par année de formation / début
+select artist.begin_date_year as annee, COUNT(*) as nb_groupes
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.area
+where artist.area = '73'
+and artist.begin_area = area.id
+and artist.begin_date_year is not null
+group by annee 
+order by annee
+
+-- nb total d'artistes dans la bd
+-- autres : orchestre + chorale + personnages fictifs
+select 
+ case when type = 1 then 'Artistes solo'
+      when type = 2 then 'Groupes'
+      else 'Autres'
+      end as type_artiste,
+      COUNT(*) as nombre
+ from musicbrainz_db.musicbrainz.artist
+ group by type_artiste
+ 
+ -- idem pour les artistes actifs en france
+select 
+ case when type = 1 then 'Artistes solo'
+      when type = 2 then 'Groupes'
+      else 'Autres'
+      end as type_artiste,
+      COUNT(*) as nombre
+ from musicbrainz_db.musicbrainz.artist
+where artist.area = '73' and artist.ended = 'false'
+ group by type_artiste
+ 
+-- retourne les infos sur les studios et lieux d'enregistrement
+-- note : seuls 10 posèdent des coordonnées, donc pas très pertinents de les afficher sur la carte intéractive
+select place.name, place.type, place.address, place.coordinates
+from musicbrainz_db.musicbrainz.place
+where place.area = '73' and place.ended = 'false'
+
+-- retourne nb artistes par département et régions, à trier
+select area.name as nom_departement, COUNT(*) as nb_artistes
+from musicbrainz_db.musicbrainz.artist, musicbrainz_db.musicbrainz.area
+where artist.ended = 'false'
+and artist.area = area.id and area.type = '2'
+group by area.name
