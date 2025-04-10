@@ -15,4 +15,4 @@ main h1{font-size:150%; color:#5d6d7e; margin-left:2%;}
 .info {background:white;padding:0px 10px;border-radius:8px;box-shadow: 0 0 5px #ccc;max-height:400px;overflow-y:auto;max-width:300px;}
 .responsive-svg {width:100%;height:auto;display:block;}
 section{margin:2em auto; text-align:center;}
-pre{font-size:14px;}
+pre{font-size:16px;}
