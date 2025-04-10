@@ -255,7 +255,7 @@ const xLollipop = d3.scaleLinear()
       .attr("transform", `translate(0,${lollipopHeight})`)
       .call(d3.axisBottom(xLollipop).ticks(5));
 
-// Lignes horizontales 
+// Lignes horizontales /*
 svgLollipop.selectAll("line")
       .data(dataLollipop)
       .join("line")
@@ -263,7 +263,7 @@ svgLollipop.selectAll("line")
 	  .attr("x2", d => xLollipop(d.nb_groupes))
       .attr("y1", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
       .attr("y2", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
-      .attr("stroke", "#ccc");
+      .attr("stroke", "#ccc"); */
 
 // Cercles
 svgLollipop.selectAll("circle")
@@ -271,7 +271,7 @@ svgLollipop.selectAll("circle")
   .enter()
   .append("circle")
     .attr("cx", d => xLollipop(d.nb_groupes))
-    .attr("cy", d => yLollipop(d.name) + yLollipop.bandwidth() / 2) // aligné avec la ligne
+    .attr("cy", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
     .attr("r", 7)
     .style("fill", "#448aff")
     .style("stroke", "#fff")
