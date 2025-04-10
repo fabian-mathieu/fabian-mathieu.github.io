@@ -32,8 +32,12 @@
     <h1>Datavisualisation - D3.js</h1>
 	<h2>Nombre d'artistes français ajoutés selon leur année de naissance (individus) ou de formation (groupes) depuis 1900</h2>
     <div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
-	<h2>Nuage des genres musicaux les plus communs des groupes français</h2>
-    <div id="wordcloud" style="width:100%; height:500px; max-width:100%;"></div>
+	<h2>Genres musicaux les plus populaires chez les groupes français</h2>
+	<button id="toggleView" style="margin-bottom:1em;">Voir en graphique lollipop</button>
+
+	<div id="wordcloud" style="width:100%; height:500px;"></div>
+	<div id="lollipop" style="width:100%; max-width:960px; height:500px; display:none;"></div>
+
 
   </main>
 	<script>
@@ -129,81 +133,150 @@
 	  });
 	</script>
 	
-	<script>
-	  const widthCloud = 960;
-	  const heightCloud = 500;
+<script>
+  const widthCloud = 960;
+  const heightCloud = 500;
 
-	  const svgCloud = d3.select("#wordcloud")
-		.append("svg")
-		.attr("viewBox", `0 0 ${widthCloud} ${heightCloud}`)
-		.attr("preserveAspectRatio", "xMidYMid meet")
-		.classed("responsive-svg", true)
-		.append("g")
-		.attr("transform", `translate(${widthCloud / 2},${heightCloud / 2})`);
+  const svgCloud = d3.select("#wordcloud")
+    .append("svg")
+    .attr("viewBox", `0 0 ${widthCloud} ${heightCloud}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .classed("responsive-svg", true)
+    .append("g")
+    .attr("transform", `translate(${widthCloud / 2},${heightCloud / 2})`);
 
-      const tooltipCloud = d3.select("#wordcloud")
-		.append("div")
-		.style("position", "absolute")
-		.style("background", "#fff")
-		.style("border", "1px solid #ccc")
-		.style("padding", "6px 10px")
-		.style("border-radius", "5px")
-		.style("pointer-events", "none")
-		.style("opacity", 0)
-		.style("font-size", "14px");
+  const tooltipCloud = d3.select("#wordcloud")
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "6px 10px")
+    .style("border-radius", "5px")
+    .style("pointer-events", "none")
+    .style("opacity", 0)
+    .style("font-size", "14px");
 
-	  d3.csv("data_d3js/tags_plus_courants_france.csv").then(data => {
-		data.forEach(d => d.nb_groupes = +d.nb_groupes);
+  d3.csv("data_d3js/tags_plus_courants_france.csv").then(data => {
+    data.forEach(d => d.nb_groupes = +d.nb_groupes);
+    data.sort((a, b) => b.nb_groupes - a.nb_groupes);
 
-		// Trier du plus populaire au moins populaire
-		data.sort((a, b) => b.nb_groupes - a.nb_groupes);
+    const fontScale = d3.scaleLinear()
+      .domain([d3.min(data, d => d.nb_groupes), d3.max(data, d => d.nb_groupes)])
+      .range([14, 60]);
 
-		const fontScale = d3.scaleLinear()
-		  .domain([d3.min(data, d => d.nb_groupes), d3.max(data, d => d.nb_groupes)])
-		  .range([14, 60]);
+    d3.layout.cloud()
+      .size([widthCloud, heightCloud])
+      .words(data.map(d => ({
+        text: d.name,
+        size: fontScale(d.nb_groupes),
+        value: d.nb_groupes
+      })))
+      .padding(2)
+      .rotate(() => 0)
+      .font("Impact")
+      .fontSize(d => d.size)
+      .on("end", drawWordcloud)
+      .start();
 
-		d3.layout.cloud()
-		  .size([widthCloud, heightCloud])
-		  .words(data.map(d => ({
-			text: d.name,
-			size: fontScale(d.nb_groupes),
-			value: d.nb_groupes
-		  })))
-		  .padding(2)
-		  .rotate(() => 0)
-		  .font("Impact")
-		  .fontSize(d => d.size)
-		  .on("end", draw)
-		  .start();
+    function drawWordcloud(words) {
+      svgCloud.selectAll("text")
+        .data(words)
+        .enter()
+        .append("text")
+        .style("font-family", "Impact")
+        .style("fill", () => d3.schemeTableau10[Math.floor(Math.random() * 10)])
+        .style("font-size", d => `${d.size}px`)
+        .attr("text-anchor", "middle")
+        .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+        .text(d => d.text)
+        .on("mouseover", (event, d) => {
+          tooltipCloud.transition().duration(200).style("opacity", 1);
+          tooltipCloud.html(`<strong>${d.text}</strong><br>${d.value} groupes`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mousemove", event => {
+          tooltipCloud
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => {
+          tooltipCloud.transition().duration(200).style("opacity", 0);
+        });
+    }
 
-		function draw(words) {
-		  svgCloud.selectAll("text")
-			.data(words)
-			.enter()
-			.append("text")
-			.style("font-family", "Impact")
-			.style("fill", () => d3.schemeTableau10[Math.floor(Math.random() * 10)])
-			.style("font-size", d => `${d.size}px`)
-			.attr("text-anchor", "middle")
-			.attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
-			.text(d => d.text)
-			.on("mouseover", (event, d) => {
-			  tooltipCloud.transition().duration(200).style("opacity", 1);
-			  tooltipCloud.html(`<strong>${d.text}</strong><br>${d.value} groupes`)
-				.style("left", (event.pageX + 10) + "px")
-				.style("top", (event.pageY - 28) + "px");
-			})
-			.on("mousemove", event => {
-			  tooltipCloud
-				.style("left", (event.pageX + 10) + "px")
-				.style("top", (event.pageY - 28) + "px");
-			})
-			.on("mouseout", () => {
-			  tooltipCloud.transition().duration(200).style("opacity", 0);
-			});
-		}
-	  });
-	</script>
+    // === LOLLIPOP CHART ===
+    const margin = { top: 20, right: 30, bottom: 100, left: 100 },
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+    const svgLollipop = d3.select("#lollipop")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .classed("responsive-svg", true)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.nb_groupes)])
+      .range([0, width]);
+
+    const y = d3.scaleBand()
+      .domain(data.map(d => d.name))
+      .range([0, height])
+      .padding(1);
+
+    svgLollipop.append("g")
+      .call(d3.axisLeft(y));
+
+    svgLollipop.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).ticks(5));
+
+    svgLollipop.selectAll("line")
+      .data(data)
+      .join("line")
+      .attr("y1", d => y(d.name))
+      .attr("y2", d => y(d.name))
+      .attr("x1", 0)
+      .attr("x2", d => x(d.nb_groupes))
+      .attr("stroke", "#ccc");
+
+    svgLollipop.selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cy", d => y(d.name))
+      .attr("cx", d => x(d.nb_groupes))
+      .attr("r", 6)
+      .style("fill", "#448aff")
+      .on("mouseover", (event, d) => {
+        tooltipCloud.transition().duration(200).style("opacity", 1);
+        tooltipCloud.html(`<strong>${d.name}</strong><br>${d.nb_groupes} groupes`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mousemove", (event) => {
+        tooltipCloud
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", () => {
+        tooltipCloud.transition().duration(200).style("opacity", 0);
+      });
+
+    // === TOGGLE BUTTON ===
+    const toggleButton = document.getElementById("toggleView");
+    let showingWordcloud = true;
+
+    toggleButton.addEventListener("click", () => {
+      showingWordcloud = !showingWordcloud;
+      document.getElementById("wordcloud").style.display = showingWordcloud ? "block" : "none";
+      document.getElementById("lollipop").style.display = showingWordcloud ? "none" : "block";
+      toggleButton.textContent = showingWordcloud ? "Voir en graphique lollipop" : "Voir en wordcloud";
+    });
+  });
+</script>
 
 </body>
 </html>
