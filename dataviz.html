@@ -233,9 +233,10 @@
       .style("pointer-events", "none")
       .style("font-size", "14px");
 
-	const xLollipop = d3.scaleLinear()
-	.domain([0, d3.max(dataLollipop, d => d.value)]) // 0 inclus ici
-	.range([0, width]);
+const xLollipop = d3.scaleLinear()
+  .domain([0, d3.max(dataLollipop, d => d.nb_groupes)])
+  .range([0, lollipopWidth]); // aussi corriger width => lollipopWidth ici
+
 
     const yLollipop = d3.scaleBand()
       .domain(dataLollipop.map(d => d.name))
@@ -254,7 +255,7 @@
       .attr("transform", `translate(0,${lollipopHeight})`)
       .call(d3.axisBottom(xLollipop).ticks(5));
 
-// Lignes horizontales (corrigé)
+// Lignes horizontales 
 svgLollipop.selectAll("line")
       .data(dataLollipop)
       .join("line")
@@ -264,7 +265,7 @@ svgLollipop.selectAll("line")
       .attr("y2", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
       .attr("stroke", "#ccc");
 
-// Cercles (corrigé)
+// Cercles
 svgLollipop.selectAll("circle")
   .data(dataLollipop)
   .enter()
