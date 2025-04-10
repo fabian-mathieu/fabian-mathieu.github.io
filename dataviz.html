@@ -218,12 +218,13 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+	const dataLollipop = data.slice(0, 50); // uniquement les 50 premiers genres
     const x = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.nb_groupes)])
+      .domain([0, d3.max(dataLollipop, d => d.nb_groupes)])
       .range([0, width]);
 
     const y = d3.scaleBand()
-      .domain(data.map(d => d.name))
+      .domain(dataLollipop.map(d => d.name))
       .range([0, height])
       .padding(1);
 
@@ -235,7 +236,7 @@
       .call(d3.axisBottom(x).ticks(5));
 
     svgLollipop.selectAll("line")
-      .data(data)
+      .data(dataLollipop)
       .join("line")
       .attr("y1", d => y(d.name))
       .attr("y2", d => y(d.name))
