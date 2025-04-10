@@ -30,17 +30,18 @@
   <main>
     <h1>Datavisualisation - D3.js</h1>
 	<h2>Nombre d'artistes français ajoutés selon leur année de naissance ou de formation</h2>
-    <div id="chart_annee" style="margin-left:2%; width:90%; height:500px;"></div>
+    <div id="chart_annee" style="width:100%; height:auto; max-width:100%;></div>
   </main>
 	<script>
-	  const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-	  const width = 900 - margin.left - margin.right;
+	  const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+	  const width = 960 - margin.left - margin.right;
 	  const height = 500 - margin.top - margin.bottom;
 
-	  const svg = d3.select("#chart_annee")
+	  const svg = d3.select("#chart")
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
+		.attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+		.attr("preserveAspectRatio", "xMidYMid meet")
+		.classed("responsive-svg", true)
 		.append("g")
 		.attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -59,7 +60,8 @@
 		  .domain([0, d3.max(data, d => d.nb_artistes)]).nice()
 		  .range([height, 0]);
 
-		svg.append("g").call(d3.axisLeft(y));
+		svg.append("g")
+		  .call(d3.axisLeft(y));
 
 		svg.append("g")
 		  .attr("transform", `translate(0,${height})`)
@@ -78,6 +80,7 @@
 		  .attr("fill", "#448aff");
 	  });
 	</script>
+
 </body>
 
 
