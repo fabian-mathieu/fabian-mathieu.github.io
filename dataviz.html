@@ -141,7 +141,7 @@
 		.append("g")
 		.attr("transform", `translate(${widthCloud / 2},${heightCloud / 2})`);
 
-	  const tooltip = d3.select("#wordcloud")
+      const tooltipCloud = d3.select("#wordcloud")
 		.append("div")
 		.style("position", "absolute")
 		.style("background", "#fff")
@@ -188,18 +188,18 @@
 			.attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
 			.text(d => d.text)
 			.on("mouseover", (event, d) => {
-			  tooltip.transition().duration(200).style("opacity", 1);
-			  tooltip.html(`<strong>${d.text}</strong><br>${d.value} groupes`)
+			  tooltipCloud.transition().duration(200).style("opacity", 1);
+			  tooltipCloud.html(`<strong>${d.text}</strong><br>${d.value} groupes`)
 				.style("left", (event.pageX + 10) + "px")
 				.style("top", (event.pageY - 28) + "px");
 			})
 			.on("mousemove", event => {
-			  tooltip
+			  tooltipCloud
 				.style("left", (event.pageX + 10) + "px")
 				.style("top", (event.pageY - 28) + "px");
 			})
 			.on("mouseout", () => {
-			  tooltip.transition().duration(200).style("opacity", 0);
+			  tooltipCloud.transition().duration(200).style("opacity", 0);
 			});
 		}
 	  });
