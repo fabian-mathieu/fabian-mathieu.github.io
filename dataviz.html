@@ -18,14 +18,14 @@
   const width = 900 - margin.left - margin.right;
   const height = 500 - margin.top - margin.bottom;
 
-  const svg = d3.select("#chart")
+  const svg = d3.select("#chart_annee")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  d3.csv("nb_artistes_france_annee.csv").then(data => {
+  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
     data.forEach(d => {
       d.annee = +d.annee;
       d.nb_artistes = +d.nb_artistes;
