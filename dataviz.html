@@ -11,6 +11,7 @@
   <link rel="icon" type="image/x-icon" href="img/icon.png">
   <link rel="stylesheet" href="style.css">
   <script src="https://d3js.org/d3.v7.js"></script>
+  <script src="https://unpkg.com/d3-cloud/build/d3.layout.cloud.js"></script>
 </head>
 
 <body>
@@ -29,8 +30,11 @@
   </header>
   <main>
     <h1>Datavisualisation - D3.js</h1>
-	<h2>Nombre d'artistes français ajoutés selon leur année de naissance ou de formation</h2>
+	<h2>Nombre d'artistes français ajoutés selon leur année de naissance ou de formation depuis 1900</h2>
     <div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
+	<h2>Nuage des genres musicaux les plus populaires en France</h2>
+    <div id="wordcloud" style="width:100%; height:500px; max-width:100%;"></div>
+
   </main>
 	<script>
 	  const margin = { top: 20, right: 30, bottom: 70, left: 80 };
@@ -124,9 +128,50 @@
 		  });
 	  });
 	</script>
+	
+	<script>
+	  const widthCloud = 960;
+	  const heightCloud = 500;
 
+	  const svgCloud = d3.select("#wordcloud")
+		.append("svg")
+		.attr("viewBox", `0 0 ${widthCloud} ${heightCloud}`)
+		.attr("preserveAspectRatio", "xMidYMid meet")
+		.classed("responsive-svg", true)
+		.append("g")
+		.attr("transform", `translate(${widthCloud / 2},${heightCloud / 2})`);
 
+	  d3.csv("data_d3js/tags_plus_courants_france.csv").then(data => {
+		data.forEach(d => {
+		  d.nb_groupes = +d.nb_groupes;
+		});
+
+		const fontScale = d3.scaleLinear()
+		  .domain([d3.min(data, d => d.nb_groupes), d3.max(data, d => d.nb_groupes)])
+		  .range([14, 60]);
+
+		d3.layout.cloud()
+		  .size([widthCloud, heightCloud])
+		  .words(data.map(d => ({ text: d.name, size: fontScale(d.nb_groupes) })))
+		  .padding(5)
+		  .rotate(() => ~~(Math.random() * 2) * 90)
+		  .font("Impact")
+		  .fontSize(d => d.size)
+		  .on("end", draw)
+		  .start();
+
+		function draw(words) {
+		  svgCloud.selectAll("text")
+			.data(words)
+			.enter().append("text")
+			.style("font-family", "Impact")
+			.style("fill", () => d3.schemeCategory10[Math.floor(Math.random() * 10)])
+			.style("font-size", d => `${d.size}px`)
+			.attr("text-anchor", "middle")
+			.attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+			.text(d => d.text);
+		}
+	  });
+	</script>
 </body>
-
-
 </html>
