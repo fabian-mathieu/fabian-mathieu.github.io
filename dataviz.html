@@ -34,12 +34,10 @@
     <div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
 	<h2>Genres musicaux les plus communs parmis les groupes français</h2>
 	<button id="toggleView" style="margin-bottom:1em;">Voir en graphique lollipop</button>
-
 	<div id="wordcloud" style="width:100%; height:500px;"></div>
 	<div id="lollipop" style="width:100%; height:auto; max-width:100%; display:none;"></div>
-
-
-
+	<h2>Répartition des groupes par type de commune</h2>
+	<div id="chart_commune" style="width:100%; max-width:600px; margin:auto;"></div>
   </main>
 	<script>
 	  const margin = { top: 20, right: 30, bottom: 70, left: 80 };
@@ -297,6 +295,86 @@ svgLollipop.selectAll("circle")
     });
   });
 </script>
+
+<script>
+  const widthPie = 600;
+  const heightPie = 400;
+  const radius = Math.min(widthPie, heightPie) / 2;
+
+  const color = d3.scaleOrdinal()
+    .domain(["Capitale", "Commune", "Préfecture", "Préfecture de région", "Sous-préfecture"])
+    .range(d3.schemeCategory10);
+
+  const svgPie = d3.select("#chart_commune")
+    .append("svg")
+    .attr("viewBox", `0 0 ${widthPie} ${heightPie}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .classed("responsive-svg", true)
+    .append("g")
+    .attr("transform", `translate(${widthPie / 2}, ${heightPie / 2})`);
+
+  const tooltipPie = d3.select("#chart_commune")
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "6px 10px")
+    .style("border-radius", "5px")
+    .style("pointer-events", "none")
+    .style("opacity", 0)
+    .style("font-size", "14px");
+
+  d3.csv("data_d3js/type_commune.csv").then(data => {
+    data.forEach(d => d.nb_groupes = +d.nb_groupes);
+
+    const pie = d3.pie()
+      .value(d => d.nb_groupes);
+
+    const data_ready = pie(data);
+
+    const arc = d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius - 10);
+
+    svgPie.selectAll("path")
+      .data(data_ready)
+      .enter()
+      .append("path")
+      .attr("d", arc)
+      .attr("fill", d => color(d.data.type_commune))
+      .style("stroke", "#fff")
+      .style("stroke-width", "2px")
+      .on("mouseover", (event, d) => {
+        tooltipPie.transition().duration(200).style("opacity", 1);
+        tooltipPie.html(`<strong>${d.data.type_commune}</strong><br>${d.data.nb_groupes} groupes`)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 28}px`);
+      })
+      .on("mousemove", (event) => {
+        tooltipPie
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 28}px`);
+      })
+      .on("mouseout", () => {
+        tooltipPie.transition().duration(200).style("opacity", 0);
+      });
+
+    // Ajout des labels
+    const labelArc = d3.arc()
+      .innerRadius(radius * 0.6)
+      .outerRadius(radius * 0.6);
+
+    svgPie.selectAll("text")
+      .data(data_ready)
+      .enter()
+      .append("text")
+      .text(d => d.data.type_commune)
+      .attr("transform", d => `translate(${labelArc.centroid(d)})`)
+      .style("text-anchor", "middle")
+      .style("font-size", "13px");
+  });
+</script>
+
 
 </body>
 </html>
