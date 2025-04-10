@@ -258,16 +258,16 @@
 svgLollipop.selectAll("line")
       .data(dataLollipop)
       .join("line")
+	  .attr("x1", d => xLollipop(d.nb_groupes))
+      .attr("x2", 0)
       .attr("y1", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
       .attr("y2", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
-      .attr("x1", 0)
-      .attr("x2", d => xLollipop(d.nb_groupes))
-    .attr("stroke", "#ccc");
+      .attr("stroke", "#ccc");
 
 // Cercles (corrigé)
 svgLollipop.selectAll("circle")
   .data(dataLollipop)
-  .join("circle")
+  .append("circle")
     .attr("cx", d => xLollipop(d.nb_groupes))
     .attr("cy", d => yLollipop(d.name))
     .attr("r", 7)
