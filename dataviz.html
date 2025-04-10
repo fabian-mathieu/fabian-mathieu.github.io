@@ -237,7 +237,6 @@
 	.domain([0, d3.max(dataLollipop, d => d.value)]) // 0 inclus ici
 	.range([0, width]);
 
-
     const yLollipop = d3.scaleBand()
       .domain(dataLollipop.map(d => d.name))
       .range([0, lollipopHeight])
@@ -261,17 +260,17 @@
 	  .enter()
 	  .append("line")
 		.attr("x1", x(0)) // part de 0
-		.attr("x2", d => x(d.value)) // va jusqu'à la valeur
-		.attr("y1", d => y(d.name))
-		.attr("y2", d => y(d.name))
+		.attr("x2", d => xLollipop(d.value)) // va jusqu'à la valeur
+		.attr("y1", d => yLollipop(d.name))
+		.attr("y2", d => yLollipop(d.name))
       .attr("stroke", "#ccc");
 
     // Cercles
     svgLollipop.selectAll("circle")
       .data(dataLollipop)
       .join("circle")
-    .attr("cx", d => x(d.value)) // positionné à l’extrémité
-    .attr("cy", d => y(d.name))
+    .attr("cx", d => xLollipop(d.value)) // positionné à l’extrémité
+    .attr("cy", d => yLollipop(d.name))
     .attr("r", 7)
       .style("fill", "#448aff")
       .style("stroke", "#fff")
