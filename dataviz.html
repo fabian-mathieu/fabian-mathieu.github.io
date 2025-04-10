@@ -33,12 +33,7 @@
 		<section id="chart_annee-section">
 		<h2>Nombre d'artistes français ajoutés selon leur année de naissance (individus) ou de formation (groupes) depuis 1900</h2>
 		<div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
-		<label for="export_chart_annee">Exporter :</label>
-			<select id="export_chart_annee" onchange="handleExport(this, 'chart_annee', 'chart_annee')">
-			  <option value="">Choisir un format</option>
-			  <option value="svg">Télécharger en SVG</option>
-			  <option value="png">Télécharger en PNG</option>
-			</select>
+		<button onclick="downloadSVG('chart_annee', 'chart_annee_commune.svg')">Télécharger SVG</button>
 			
 	</section>
 	<section id="wordcloud-section">
@@ -477,15 +472,5 @@ svgLollipop.selectAll("circle")
 	}
 	</script>
 	
-	<script>
-		function handleExport(selectElement, containerId, filenameBase) {
-		  const format = selectElement.value;
-		  if (format) {
-			downloadChart(containerId, filenameBase, format);
-			selectElement.value = ""; // reset après téléchargement
-		  }
-		}
-	</script>
-
 </body>
 </html>
