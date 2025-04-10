@@ -29,11 +29,11 @@
   <main>
 	<h2>Introduction</h2>
 	  <pre>
-		De nombreuses données existent sur l’industrie de la musique dans le monde. Des 675 millions d’utilisateurs de Spotify, 
-		au milliard d’euros que représente l’industrie de la musique enregistrée en France, sans parler des concerts, le tableau 
-		semble à priori complet. Le problème, c’est que très peu de données géographiques existent : où se forment les groupes ? 
-		Ont-ils des salles de concert à proximité ?  Existe-t-il des scènes locales particulières ? Ici, l’objectif sera de dresser 
-		un portait général des groupes de musique actifs en France métropolitaine.
+	  De nombreuses données existent sur l’industrie de la musique dans le monde. Des 675 millions d’utilisateurs de Spotify, 
+	  au milliard d’euros que représente l’industrie de la musique enregistrée en France, sans parler des concerts, le tableau 
+	  semble à priori complet. Le problème, c’est que très peu de données géographiques existent : où se forment les groupes ? 
+	  Ont-ils des salles de concert à proximité ?  Existe-t-il des scènes locales particulières ? Ici, l’objectif sera de dresser 
+	  un portait général des groupes de musique actifs en France métropolitaine.
 	  </pre>
 	<h2>Données utilisées</h2>
       <pre>
@@ -68,17 +68,9 @@
 	  Cette carte à été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos 
 	  requêtes SQL (). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage manuel a été fait. 
 	  Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb à 4,4 mb) et exporter un geojson qui associait 
-	  tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb).
-	</pre>
-		<iframe
-	        id="code_python"
-	        title="code_python"
-	        width="1000px"
-	        height="600px"
-	        src="https://github.com/fabian-mathieu/fabian-mathieu.github.io/blob/main/scripts_python/formatage_geojson_villes.py">
-	      </iframe>
-	<pre>
-	  Les infographies dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, 
+	  tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb) (https://github.com/fabian-mathieu/fabian-mathieu.github.io/blob/main/scripts_python/formatage_geojson_villes.py).
+
+	  Les graphiques dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, 
 	  un « wordwrap » des genres musicaux les plus communs des groupes présents sur la carte, sa déclinaison en « lollipop », et un « pie chart » 
 	  de la répartition des groupes par type de commune.
 	
