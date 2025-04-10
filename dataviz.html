@@ -33,8 +33,13 @@
 		<section id="chart_annee-section">
 		<h2>Nombre d'artistes français ajoutés selon leur année de naissance (individus) ou de formation (groupes) depuis 1900</h2>
 		<div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
-		<button onclick="downloadSVG('chart_annee', 'chart_annee_commune.svg')">Télécharger SVG</button>
-
+		<label for="export_chart_annee">Exporter :</label>
+			<select id="export_chart_annee" onchange="handleExport(this, 'chart_annee', 'chart_annee_commune')">
+			  <option value="">Choisir un format</option>
+			  <option value="svg">Télécharger en SVG</option>
+			  <option value="png">Télécharger en PNG</option>
+			</select>
+			
 	</section>
 	<section id="wordcloud-section">
 		<h2>Genres musicaux les plus communs parmis les groupes français</h2>
@@ -413,6 +418,74 @@ svgLollipop.selectAll("circle")
 	  document.body.removeChild(a);
 	}
 </script>
+
+	<script>
+	function downloadChart(containerId, filenameBase, format = 'svg') {
+	  const svg = document.querySelector(`#${containerId} svg`);
+	  if (!svg) return alert("SVG non trouvé !");
+
+	  const serializer = new XMLSerializer();
+	  let source = serializer.serializeToString(svg);
+
+	  // Ajoute les namespaces si absents
+	  if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+		source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+	  }
+	  if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+		source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+	  }
+
+	  if (format === 'svg') {
+		const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `${filenameBase}.svg`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	  } else if (format === 'png') {
+		const image = new Image();
+		const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+		const url = URL.createObjectURL(svgBlob);
+
+		image.onload = () => {
+		  const canvas = document.createElement("canvas");
+		  const scale = 3; // pour meilleure qualité
+		  canvas.width = image.width * scale;
+		  canvas.height = image.height * scale;
+		  const context = canvas.getContext("2d");
+
+		  context.setTransform(scale, 0, 0, scale, 0, 0);
+		  context.drawImage(image, 0, 0);
+
+		  URL.revokeObjectURL(url);
+		  canvas.toBlob(blob => {
+			const a = document.createElement("a");
+			a.href = URL.createObjectURL(blob);
+			a.download = `${filenameBase}.png`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		  }, "image/png");
+		};
+
+		image.onerror = () => alert("Erreur de chargement de l'image SVG !");
+		image.src = url;
+	  }
+	}
+	</script>
+	
+	<script>
+		function handleExport(selectElement, containerId, filenameBase) {
+		  const format = selectElement.value;
+		  if (format) {
+			downloadChart(containerId, filenameBase, format);
+			selectElement.value = ""; // reset après téléchargement
+		  }
+		}
+	</script>
 
 </body>
 </html>
