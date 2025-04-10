@@ -33,7 +33,7 @@
     <div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
   </main>
 	<script>
-	  const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+	  const margin = { top: 20, right: 30, bottom: 70, left: 70 };
 	  const width = 960 - margin.left - margin.right;
 	  const height = 500 - margin.top - margin.bottom;
 
@@ -45,7 +45,19 @@
 		.append("g")
 		.attr("transform", `translate(${margin.left},${margin.top})`);
 
-	  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
+	  // Tooltips
+	  const tooltip = d3.select("#chart")
+		.append("div")
+		.style("position", "absolute")
+		.style("background", "#fff")
+		.style("border", "1px solid #ccc")
+		.style("padding", "8px")
+		.style("border-radius", "5px")
+		.style("pointer-events", "none")
+		.style("opacity", 0)
+		.style("font-size", "14px");
+
+	  d3.csv('data/nb_artistes_france_annee.csv').then(data => {
 		data.forEach(d => {
 		  d.annee = +d.annee;
 		  d.nb_artistes = +d.nb_artistes;
@@ -60,9 +72,11 @@
 		  .domain([0, d3.max(data, d => d.nb_artistes)]).nice()
 		  .range([height, 0]);
 
+		// Axe Y
 		svg.append("g")
 		  .call(d3.axisLeft(y));
 
+		// Axe X
 		svg.append("g")
 		  .attr("transform", `translate(0,${height})`)
 		  .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
@@ -70,6 +84,23 @@
 		  .attr("transform", "rotate(-45)")
 		  .style("text-anchor", "end");
 
+		// Légende Y
+		svg.append("text")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", -margin.left + 20)
+		  .attr("x", -height / 2)
+		  .attr("dy", "-1em")
+		  .style("text-anchor", "middle")
+		  .text("Nombre d’artistes");
+
+		// Légende X
+		svg.append("text")
+		  .attr("x", width / 2)
+		  .attr("y", height + margin.bottom - 10)
+		  .style("text-anchor", "middle")
+		  .text("Année");
+
+		// Barres
 		svg.selectAll("rect")
 		  .data(data)
 		  .join("rect")
@@ -77,9 +108,23 @@
 		  .attr("y", d => y(d.nb_artistes))
 		  .attr("width", x.bandwidth())
 		  .attr("height", d => height - y(d.nb_artistes))
-		  .attr("fill", "#448aff");
+		  .attr("fill", "#448aff")
+		  .on("mouseover", (event, d) => {
+			tooltip.transition().duration(200).style("opacity", 1);
+			tooltip.html(`<strong>${d.annee}</strong><br>${d.nb_artistes} artistes`)
+			  .style("left", (event.pageX + 10) + "px")
+			  .style("top", (event.pageY - 28) + "px");
+		  })
+		  .on("mousemove", (event) => {
+			tooltip.style("left", (event.pageX + 10) + "px")
+				   .style("top", (event.pageY - 28) + "px");
+		  })
+		  .on("mouseout", () => {
+			tooltip.transition().duration(200).style("opacity", 0);
+		  });
 	  });
 	</script>
+
 
 </body>
 
