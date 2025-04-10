@@ -57,7 +57,7 @@
 		.style("opacity", 0)
 		.style("font-size", "14px");
 
-	  d3.csv('data/nb_artistes_france_annee.csv').then(data => {
+	  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
 		data.forEach(d => {
 		  d.annee = +d.annee;
 		  d.nb_artistes = +d.nb_artistes;
