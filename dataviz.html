@@ -25,7 +25,7 @@
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  d3.csv("/data_d3js/nb_artistes_france_annee.csv").then(data => {
+  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
     data.forEach(d => {
       d.annee = +d.annee;
       d.nb_artistes = +d.nb_artistes;
