@@ -218,7 +218,7 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-	const dataLollipop = data.slice(0, 50); // uniquement les 50 premiers genres
+	const dataLollipop = data.slice(0, 25); // uniquement les 25 premiers genres
     const x = d3.scaleLinear()
       .domain([0, d3.max(dataLollipop, d => d.nb_groupes)])
       .range([0, width]);
