@@ -141,10 +141,22 @@
 		.append("g")
 		.attr("transform", `translate(${widthCloud / 2},${heightCloud / 2})`);
 
+	  const tooltip = d3.select("#wordcloud")
+		.append("div")
+		.style("position", "absolute")
+		.style("background", "#fff")
+		.style("border", "1px solid #ccc")
+		.style("padding", "6px 10px")
+		.style("border-radius", "5px")
+		.style("pointer-events", "none")
+		.style("opacity", 0)
+		.style("font-size", "14px");
+
 	  d3.csv("data_d3js/tags_plus_courants_france.csv").then(data => {
-		data.forEach(d => {
-		  d.nb_groupes = +d.nb_groupes;
-		});
+		data.forEach(d => d.nb_groupes = +d.nb_groupes);
+
+		// Trier du plus populaire au moins populaire
+		data.sort((a, b) => b.nb_groupes - a.nb_groupes);
 
 		const fontScale = d3.scaleLinear()
 		  .domain([d3.min(data, d => d.nb_groupes), d3.max(data, d => d.nb_groupes)])
@@ -152,8 +164,12 @@
 
 		d3.layout.cloud()
 		  .size([widthCloud, heightCloud])
-		  .words(data.map(d => ({ text: d.name, size: fontScale(d.nb_groupes) })))
-		  .padding(1)
+		  .words(data.map(d => ({
+			text: d.name,
+			size: fontScale(d.nb_groupes),
+			value: d.nb_groupes
+		  })))
+		  .padding(2)
 		  .rotate(() => 0)
 		  .font("Impact")
 		  .fontSize(d => d.size)
@@ -163,15 +179,31 @@
 		function draw(words) {
 		  svgCloud.selectAll("text")
 			.data(words)
-			.enter().append("text")
+			.enter()
+			.append("text")
 			.style("font-family", "Impact")
-			.style("fill", () => d3.schemeCategory10[Math.floor(Math.random() * 10)])
+			.style("fill", () => d3.schemeTableau10[Math.floor(Math.random() * 10)])
 			.style("font-size", d => `${d.size}px`)
 			.attr("text-anchor", "middle")
 			.attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
-			.text(d => d.text);
+			.text(d => d.text)
+			.on("mouseover", (event, d) => {
+			  tooltip.transition().duration(200).style("opacity", 1);
+			  tooltip.html(`<strong>${d.text}</strong><br>${d.value} groupes`)
+				.style("left", (event.pageX + 10) + "px")
+				.style("top", (event.pageY - 28) + "px");
+			})
+			.on("mousemove", event => {
+			  tooltip
+				.style("left", (event.pageX + 10) + "px")
+				.style("top", (event.pageY - 28) + "px");
+			})
+			.on("mouseout", () => {
+			  tooltip.transition().duration(200).style("opacity", 0);
+			});
 		}
 	  });
 	</script>
+
 </body>
 </html>
