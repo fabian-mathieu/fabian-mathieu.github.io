@@ -50,12 +50,19 @@
 	  
 	Le choix a été fait de se concentrer sur les groupes français actifs et possédant une localisation au niveau de leurs villes. La carte interactive sous leaflet devait initialement montrer les groupes dont on connaissait seulement le département ou la région, mais cela à été retiré car pas strictement nécessaire. 733 groupes français actifs possèdent une localisation au niveau de leur ville sur MusicBrainz.
 	
-	Cette carte à été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos requêtes SQL (). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage manuel a été fait. Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb à 4,4 mb) et exporter un geojson qui associait tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb) (https://github.com/fabian-mathieu/fabian-mathieu.github.io/blob/main/scripts_python/formatage_geojson_villes.py).
-	
+	Cette carte à été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos requêtes SQL (). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage manuel a été fait. Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb à 4,4 mb) et exporter un geojson qui associait tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb).
+	</pre>
+		<iframe
+	        id="code_python"
+	        title="code_python"
+	        width="1000px"
+	        height="600px"
+	        src="https://github.com/fabian-mathieu/fabian-mathieu.github.io/blob/main/scripts_python/formatage_geojson_villes.py">
+	      </iframe>
+	<pre>
 	Les infographies dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, un « wordwrap » des genres musicaux les plus communs des groupes présents sur la carte, sa déclinaison en « lollipop », et un « pie chart » de la répartition des groupes par type de commune.
 	
 	L’infographie à été réalisée avec le site Canvas.
-
 	  </pre>
 	<h2>Résultats</h2>
 	  <pre>
