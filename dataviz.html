@@ -258,8 +258,8 @@
 svgLollipop.selectAll("line")
       .data(dataLollipop)
       .join("line")
-	  .attr("x1", d => xLollipop(d.nb_groupes))
-      .attr("x2", 0)
+	  .attr("x1", 0)
+	  .attr("x2", d => xLollipop(d.nb_groupes))
       .attr("y1", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
       .attr("y2", d => yLollipop(d.name) + yLollipop.bandwidth() / 2)
       .attr("stroke", "#ccc");
@@ -267,28 +267,29 @@ svgLollipop.selectAll("line")
 // Cercles (corrigé)
 svgLollipop.selectAll("circle")
   .data(dataLollipop)
+  .enter()
   .append("circle")
     .attr("cx", d => xLollipop(d.nb_groupes))
-    .attr("cy", d => yLollipop(d.name))
+    .attr("cy", d => yLollipop(d.name) + yLollipop.bandwidth() / 2) // aligné avec la ligne
     .attr("r", 7)
     .style("fill", "#448aff")
     .style("stroke", "#fff")
     .style("stroke-width", 2)
+    .on("mouseover", (event, d) => {
+      tooltipLollipop.html(`<strong>${d.name}</strong><br>${d.nb_groupes} groupes`)
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 28}px`)
+        .style("visibility", "visible");
+    })
+    .on("mousemove", (event) => {
+      tooltipLollipop
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 28}px`);
+    })
+    .on("mouseout", () => {
+      tooltipLollipop.style("visibility", "hidden");
+    });
 
-      .on("mouseover", (event, d) => {
-        tooltipLollipop.html(`<strong>${d.name}</strong><br>${d.nb_groupes} groupes`)
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`)
-          .style("visibility", "visible");
-      })
-      .on("mousemove", (event) => {
-        tooltipLollipop
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`);
-      })
-      .on("mouseout", () => {
-        tooltipLollipop.style("visibility", "hidden");
-      });
 
     // === TOGGLE BUTTON ===
     const toggleButton = document.getElementById("toggleView");
