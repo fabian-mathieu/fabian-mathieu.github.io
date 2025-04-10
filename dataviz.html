@@ -32,7 +32,7 @@
     <h1>Datavisualisation - D3.js</h1>
 	<h2>Nombre d'artistes français ajoutés selon leur année de naissance (individus) ou de formation (groupes) depuis 1900</h2>
     <div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
-	<h2>Nuage des genres musicaux les plus communs en France</h2>
+	<h2>Nuage des genres musicaux les plus communs des groupes français</h2>
     <div id="wordcloud" style="width:100%; height:500px; max-width:100%;"></div>
 
   </main>
@@ -154,6 +154,7 @@
 		  .size([widthCloud, heightCloud])
 		  .words(data.map(d => ({ text: d.name, size: fontScale(d.nb_groupes) })))
 		  .padding(5)
+		  .rotate(() => 0)
 		  .font("Impact")
 		  .fontSize(d => d.size)
 		  .on("end", draw)
