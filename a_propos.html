@@ -29,13 +29,23 @@
   <main>
 	<h2>Introduction</h2>
 	  <pre>
-		De nombreuses données existent sur l’industrie de la musique dans le monde. Des 675 millions d’utilisateurs de Spotify  , au milliard d’euros que représente l’industrie de la musique enregistrée en France  sans parler des concerts, le tableau semble à priori complet. Le problème, c’est que très peu de données géographiques existent : où se forment les groupes ? Ont-ils des salles de concert à proximité ?  Existe-t-il des scènes locales particulières ? Ici, l’objectif sera de dresser un portait général des groupes de musique actifs en France métropolitaine.
+		De nombreuses données existent sur l’industrie de la musique dans le monde. Des 675 millions d’utilisateurs de Spotify, 
+		au milliard d’euros que représente l’industrie de la musique enregistrée en France, sans parler des concerts, le tableau 
+		semble à priori complet. Le problème, c’est que très peu de données géographiques existent : où se forment les groupes ? 
+		Ont-ils des salles de concert à proximité ?  Existe-t-il des scènes locales particulières ? Ici, l’objectif sera de dresser 
+		un portait général des groupes de musique actifs en France métropolitaine.
 	  </pre>
 	<h2>Données utilisées</h2>
       <pre>
-	  Les données utilisées proviennent de MusicBrainz, une base de données open source et collaborative lancée en 2000. On peut la voir comme le "wikipedia de la musique". Ses données sont très complètes : on plus des genres musicaux de l'artiste, on peut y trouver leur lieu de formation, de résidence actuelle, ainsi que toutes les versions CD, vinyles ou numériques de leurs sorties.
-	Il existe d'autres bases de données de ce type (Discogs, RateYourMusic), mais MusicBrainz est la seule à disposer de la localisation des groupes pour tous les types de musiques et qui propose librement ses données en téléchargement.
-	Les "Core Data" de MusicBrainz sont distribués sous la licence CC0 : leur utilisation est complètement libre. Les "Supplementary Data" comprennent des données entrées par les utilisateurs comme le ou les genres musicaux du groupe. Elles distribuées avec la licence CC BY-NC-SA 3.0, permettant de modifier et de partager la donnée dans un cadre non-commercial, en citant la source, et en redistribuant ce travail sous cette même licence.
+	  Les données utilisées proviennent de MusicBrainz, une base de données open source et collaborative lancée en 2000. 
+	  On peut la voir comme le "wikipedia de la musique". Ses données sont très complètes : en plus des genres musicaux de l'artiste, 
+	  on peut y trouver leur lieu de formation, de résidence actuelle, ainsi que toutes les versions CD, vinyles ou numériques de leurs 
+	  sorties. Il existe d'autres bases de données de ce type (Discogs, RateYourMusic), mais MusicBrainz est la seule à disposer de la 
+	  localisation des groupes pour tous les types de musiques et qui propose librement ses données en téléchargement.
+	  Les "Core Data" de MusicBrainz sont distribués sous la licence CC0 : leur utilisation est complètement libre. Les 
+	  "Supplementary Data" comprennent des données entrées par les utilisateurs comme le ou les genres musicaux du groupe. Elles 
+	  distribuées avec la licence CC BY-NC-SA 3.0, permettant de modifier et de partager la donnée dans un cadre non-commercial, 
+	  en citant la source, et en redistribuant ce travail sous cette même licence.
 	  </pre>
 		  <iframe
 	        id="MusicBrainz"
@@ -46,11 +56,19 @@
 	      </iframe>
 	<h2>Méthodologie</h2>
 	  <pre>
-	  Pour utiliser ces données, il faut télécharger une instance locale de la base PostgreSQL de MusicBrainz en entier. L’installation s’est faite sur une machine virtuelle Ubuntu LTS en utilisant docker, comme expliqué dans la documentation. C’était la partie la plus chronophage et complexe de ce travail. Toutes les données utilisées proviennent des exports .csv de requêtes SQL effectuées sur le logiciel dbeaver, qui sont disponibles sur le github (https://github.com/metabrainz/musicbrainz-docker).
+	  Pour utiliser ces données, il faut télécharger une instance locale de la base PostgreSQL de MusicBrainz en entier. L’installation 
+	  s’est faite sur une machine virtuelle Ubuntu LTS en utilisant docker, comme expliqué dans la documentation. C’était la partie la plus 
+	  chronophage et complexe de ce travail. Toutes les données utilisées proviennent des exports .csv de requêtes SQL effectuées sur le logiciel 
+	  dbeaver, qui sont disponibles sur le github (https://github.com/metabrainz/musicbrainz-docker).
 	  
-	Le choix a été fait de se concentrer sur les groupes français actifs et possédant une localisation au niveau de leurs villes. La carte interactive sous leaflet devait initialement montrer les groupes dont on connaissait seulement le département ou la région, mais cela à été retiré car pas strictement nécessaire. 733 groupes français actifs possèdent une localisation au niveau de leur ville sur MusicBrainz.
+	  Le choix a été fait de se concentrer sur les groupes français actifs et possédant une localisation au niveau de leurs villes. La carte 
+	  interactive sous leaflet devait initialement montrer les groupes dont on connaissait seulement le département ou la région, mais cela à 
+	  été retiré car pas strictement nécessaire. 733 groupes français actifs possèdent une localisation au niveau de leur ville sur MusicBrainz.
 	
-	Cette carte à été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos requêtes SQL (). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage manuel a été fait. Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb à 4,4 mb) et exporter un geojson qui associait tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb).
+	  Cette carte à été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos 
+	  requêtes SQL (). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage manuel a été fait. 
+	  Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb à 4,4 mb) et exporter un geojson qui associait 
+	  tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (de 4,4 mb à 430 kb).
 	</pre>
 		<iframe
 	        id="code_python"
@@ -60,17 +78,25 @@
 	        src="https://github.com/fabian-mathieu/fabian-mathieu.github.io/blob/main/scripts_python/formatage_geojson_villes.py">
 	      </iframe>
 	<pre>
-	Les infographies dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, un « wordwrap » des genres musicaux les plus communs des groupes présents sur la carte, sa déclinaison en « lollipop », et un « pie chart » de la répartition des groupes par type de commune.
+	  Les infographies dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, 
+	  un « wordwrap » des genres musicaux les plus communs des groupes présents sur la carte, sa déclinaison en « lollipop », et un « pie chart » 
+	  de la répartition des groupes par type de commune.
 	
-	L’infographie à été réalisée avec le site Canvas.
+	  L’infographie à été réalisée avec le site Canvas.
 	  </pre>
 	<h2>Résultats</h2>
 	  <pre>
-	  Evidemment, cette liste de 733 artistes est très incomplète, et s'explique par différents facteurs. Déjà, la communauté musicbrainz est assez réduite, et bien souvent la localisation des groupes n'est pas présente ou encore moins mise à jour. Le fait de n'inclure que les groupes exclut beaucoup d'artistes d'autres genres :  les artistes individuels comme les rappeurs sont de facto exclus de cette analyse dans leur grande majorité. Le wordwrap montre la surreprésentation de groupes de métal par rapport à la réalité : cela s’explique par la base de fans mondiale pour ce genre de musique, qui s’exporte très facilement comparé à des artistes connus seulement dans leur pays d’origine.
+	  Evidemment, cette liste de 733 artistes est très incomplète, et s'explique par différents facteurs. Déjà, la communauté musicbrainz est assez 
+	  réduite, et bien souvent la localisation des groupes n'est pas présente ou encore moins mise à jour. Le fait de n'inclure que les groupes exclut 
+	  beaucoup d'artistes d'autres genres :  les artistes individuels comme les rappeurs sont de facto exclus de cette analyse dans leur grande majorité. 
+	  Le wordwrap montre la surreprésentation de groupes de métal par rapport à la réalité : cela s’explique par la base de fans mondiale pour ce genre 
+	  de musique, qui s’exporte très facilement comparé à des artistes connus seulement dans leur pays d’origine.
 	  </pre>
 	<h2>Conclusion</h2>
 	  <pre>
-	  Si le site actuel ne fait qu’effleurer la surface en termes de représentation possible des données présentes dans la base, les données géographiques en particulier sont loin d’être exhaustives. A l’heure actuelle, le site est une ébauche de ce à quoi pourrait ressembler un site proposant une cartographie plus complète des groupes en France.
+	  Si le site actuel ne fait qu’effleurer la surface en termes de représentation possible des données présentes dans la base, les données 
+	  géographiques en particulier sont loin d’être exhaustives. A l’heure actuelle, le site est une ébauche de ce à quoi pourrait ressembler 
+	  un site proposant une cartographie plus complète des groupes en France.
 	  </pre>
   </main>
 </body>
