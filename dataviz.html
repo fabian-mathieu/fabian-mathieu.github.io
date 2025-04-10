@@ -254,27 +254,28 @@
       .attr("transform", `translate(0,${lollipopHeight})`)
       .call(d3.axisBottom(xLollipop).ticks(5));
 
-    // Lignes horizontales
-    svgLollipop.selectAll("line")
-	  .data(data)
-	  .enter()
-	  .append("line")
-		.attr("x1", xLollipop(0)) // part de 0
-		.attr("x2", d => xLollipop(d.value)) // va jusqu'à la valeur
-		.attr("y1", d => yLollipop(d.name))
-		.attr("y2", d => yLollipop(d.name))
-      .attr("stroke", "#ccc");
+// Lignes horizontales (corrigé)
+svgLollipop.selectAll("line")
+  .data(dataLollipop)
+  .enter()
+  .append("line")
+    .attr("x1", xLollipop(0)) // part de 0
+    .attr("x2", d => xLollipop(d.nb_groupes)) // va jusqu'à la valeur
+    .attr("y1", d => yLollipop(d.name))
+    .attr("y2", d => yLollipop(d.name))
+    .attr("stroke", "#ccc");
 
-    // Cercles
-    svgLollipop.selectAll("circle")
-      .data(dataLollipop)
-      .join("circle")
-    .attr("cx", d => xLollipop(d.value)) // positionné à l’extrémité
+// Cercles (corrigé)
+svgLollipop.selectAll("circle")
+  .data(dataLollipop)
+  .join("circle")
+    .attr("cx", d => xLollipop(d.nb_groupes))
     .attr("cy", d => yLollipop(d.name))
     .attr("r", 7)
-      .style("fill", "#448aff")
-      .style("stroke", "#fff")
-      .style("stroke-width", 2)
+    .style("fill", "#448aff")
+    .style("stroke", "#fff")
+    .style("stroke-width", 2)
+
       .on("mouseover", (event, d) => {
         tooltipLollipop.html(`<strong>${d.name}</strong><br>${d.nb_groupes} groupes`)
           .style("left", `${event.pageX + 10}px`)
