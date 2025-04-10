@@ -32,6 +32,17 @@
     <h1>Datavisualisation - D3.js</h1>
 		<section id="chart_annee-section">
 		<h2>Nombre d'artistes français ajoutés selon leur année de naissance (individus) ou de formation (groupes) depuis 1900</h2>
+		<div style="margin-bottom: 1em;">
+		  <label for="startYear">Année de début : <span id="startLabel">1900</span></label><br>
+		  <input type="range" id="startYear" min="1900" max="2025" value="1900" step="1">
+		  
+		  <br><br>
+
+		  <label for="endYear">Année de fin : <span id="endLabel">2025</span></label><br>
+		  <input type="range" id="endYear" min="1900" max="2025" value="2025" step="1">
+		</div>
+		<div id="chart_annee"></div>
+
 		<div id="chart_annee" style="width:100%; height:auto; max-width:100%;"></div>
 		<button onclick="downloadSVG('chart_annee', 'chart_annee_commune.svg')">Télécharger SVG</button>
 			
@@ -50,98 +61,119 @@
 		<button onclick="downloadSVG('chart_commune', 'chart_commune.svg')">Télécharger SVG</button>
 	</section>
   </main>
-	<script>
-	  const margin = { top: 20, right: 30, bottom: 70, left: 80 };
-	  const width = 960 - margin.left - margin.right;
-	  const height = 500 - margin.top - margin.bottom;
+<script>
+  const margin = { top: 20, right: 30, bottom: 70, left: 80 };
+  const width = 960 - margin.left - margin.right;
+  const height = 500 - margin.top - margin.bottom;
 
-	  const svg = d3.select("#chart_annee")
-		.append("svg")
-		.attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-		.attr("preserveAspectRatio", "xMidYMid meet")
-		.classed("responsive-svg", true)
-		.append("g")
-		.attr("transform", `translate(${margin.left},${margin.top})`);
+  const svg = d3.select("#chart_annee")
+    .append("svg")
+    .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .classed("responsive-svg", true)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-	  // Tooltips
-	  const tooltip = d3.select("#chart_annee")
-		.append("div")
-		.style("position", "absolute")
-		.style("background", "#fff")
-		.style("border", "1px solid #ccc")
-		.style("padding", "8px")
-		.style("border-radius", "5px")
-		.style("pointer-events", "none")
-		.style("opacity", 0)
-		.style("font-size", "14px");
+  const tooltip = d3.select("#chart_annee")
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "8px")
+    .style("border-radius", "5px")
+    .style("pointer-events", "none")
+    .style("opacity", 0)
+    .style("font-size", "14px");
 
-	  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
-		data.forEach(d => {
-		  d.annee = +d.annee;
-		  d.nb_artistes = +d.nb_artistes;
-		});
+  let allData;
 
-		const x = d3.scaleBand()
-		  .domain(data.map(d => d.annee))
-		  .range([0, width])
-		  .padding(0.1);
+  d3.csv('data_d3js/nb_artistes_france_annee.csv').then(data => {
+    data.forEach(d => {
+      d.annee = +d.annee;
+      d.nb_artistes = +d.nb_artistes;
+    });
+    allData = data;
 
-		const y = d3.scaleLinear()
-		  .domain([0, d3.max(data, d => d.nb_artistes)]).nice()
-		  .range([height, 0]);
+    d3.select("#startYear").on("input", updateChart);
+    d3.select("#endYear").on("input", updateChart);
 
-		// Axe Y
-		svg.append("g")
-		  .call(d3.axisLeft(y));
+    updateChart();
+  });
 
-		// Axe X
-		svg.append("g")
-		  .attr("transform", `translate(0,${height})`)
-		  .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
-		  .selectAll("text")
-		  .attr("transform", "rotate(-45)")
-		  .style("text-anchor", "end");
+  function updateChart() {
+    const startYear = +document.getElementById("startYear").value;
+    const endYear = +document.getElementById("endYear").value;
 
-		// Légende Y
-		svg.append("text")
-		  .attr("transform", "rotate(-90)")
-		  .attr("y", -margin.left + 40)
-		  .attr("x", -height / 2)
-		  .attr("dy", "-1em")
-		  .style("text-anchor", "middle")
-		  .text("Nombre d’artistes");
+    // Mise à jour des labels
+    document.getElementById("startLabel").textContent = startYear;
+    document.getElementById("endLabel").textContent = endYear;
 
-		// Légende X
-		svg.append("text")
-		  .attr("x", width / 2)
-		  .attr("y", height + margin.bottom - 10)
-		  .style("text-anchor", "middle")
-		  .text("Année");
+    // Filtrage des données
+    const filteredData = allData.filter(d => d.annee >= startYear && d.annee <= endYear);
 
-		// Barres
-		svg.selectAll("rect")
-		  .data(data)
-		  .join("rect")
-		  .attr("x", d => x(d.annee))
-		  .attr("y", d => y(d.nb_artistes))
-		  .attr("width", x.bandwidth())
-		  .attr("height", d => height - y(d.nb_artistes))
-		  .attr("fill", "#448aff")
-		  .on("mouseover", (event, d) => {
-			tooltip.transition().duration(200).style("opacity", 1);
-			tooltip.html(`<strong>${d.annee}</strong><br>${d.nb_artistes} artistes`)
-			  .style("left", (event.pageX + 10) + "px")
-			  .style("top", (event.pageY - 28) + "px");
-		  })
-		  .on("mousemove", (event) => {
-			tooltip.style("left", (event.pageX + 10) + "px")
-				   .style("top", (event.pageY - 28) + "px");
-		  })
-		  .on("mouseout", () => {
-			tooltip.transition().duration(200).style("opacity", 0);
-		  });
-	  });
-	</script>
+    // Échelles
+    const x = d3.scaleBand()
+      .domain(filteredData.map(d => d.annee))
+      .range([0, width])
+      .padding(0.1);
+
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(filteredData, d => d.nb_artistes)]).nice()
+      .range([height, 0]);
+
+    // Nettoyage ancien graphique
+    svg.selectAll("*").remove();
+
+    // Axes
+    svg.append("g").call(d3.axisLeft(y));
+
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => i % 5 === 0)))
+      .selectAll("text")
+      .attr("transform", "rotate(-45)")
+      .style("text-anchor", "end");
+
+    // Légendes
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left + 40)
+      .attr("x", -height / 2)
+      .attr("dy", "-1em")
+      .style("text-anchor", "middle")
+      .text("Nombre d’artistes");
+
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + margin.bottom - 10)
+      .style("text-anchor", "middle")
+      .text("Année");
+
+    // Barres
+    svg.selectAll("rect")
+      .data(filteredData)
+      .join("rect")
+      .attr("x", d => x(d.annee))
+      .attr("y", d => y(d.nb_artistes))
+      .attr("width", x.bandwidth())
+      .attr("height", d => height - y(d.nb_artistes))
+      .attr("fill", "#448aff")
+      .on("mouseover", (event, d) => {
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(`<strong>${d.annee}</strong><br>${d.nb_artistes} artistes`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mousemove", (event) => {
+        tooltip.style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(200).style("opacity", 0);
+      });
+  }
+</script>
+
 	
 <script>
   const widthCloud = 960;
