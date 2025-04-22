@@ -3,11 +3,11 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Dataviz - les groupes musicaux en france">
+  <meta name="description" content="Observatoire des territoires - PNR de la Forêt d'Orient">
   <meta name="author" content="Fabian MATHIEU">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
-  <title>Dataviz</title>
+  <title>PNR - Forêt d'Orient</title>
   <link rel="icon" type="image/x-icon" href="img/icon.png">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -15,92 +15,24 @@
 <body>
   <header>
     <div class="pnr"><a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
-      <h1><a href="index.html">Dataviz : la répartition des groupes musicaux en France</a></h1>
+      <h1><a href="index.html">PNR de la Forêt d'Orient</a></h1>
     </div>
     <nav class="nav">
       <ul class="ul">
-        <li><a href="index.html"><img src="img/geo_blue.svg" width="16" height="16">Carte</a></li>
-		<li><a href="infographie.html"><img src="img/graph_blue.svg" width="16" height="16">Infographie</a></li>
-		<li><a href="dataviz.html"><img src="img/chart_blue.svg" width="16" height="16">Dataviz</a></li>
+        <li><a href="index.html"><img src="img/house_green.svg" width="16" height="16">Accueil</a></li>
+        <li><a href="presentation.html"><img src="img/binoculars_green.svg" width="16" height="16">Présentation</a></li>
+        <li><a href="culture.html"><img src="img/signpost_green.svg" width="16" height="16">Patrimoine culturel</a></li>
+        <li><a href="nature.html"><img src="img/tree_green.svg" width="16" height="16">Patrimoine naturel</a></li>
+        <li><a href="amenagement.html"><img src="img/person_walking_green.svg" width="16" height="16">Aménagements du territoire</a></li>
         <li class="active"><a href="a_propos.html"><img src="img/info_white.svg" width="16" height="16">À propos</a></li>
       </ul>
     </nav>
   </header>
   <main>
-	<h1>Introduction</h1>
-	  <pre>
-	  De nombreuses données existent sur la musique dans le monde. Des 675 millions d’utilisateurs de Spotify, 
-	  au milliard d’euros que représente l’industrie de la musique enregistrée en France, sans parler des concerts, le tableau 
-	  semble à priori complet. Le problème, c’est que très peu de données géographiques existent : où se forment les groupes ? 
-	  Ont-ils des salles de concert à proximité ? Existe-t-il des scènes locales particulières ? Ici, l’objectif sera de dresser 
-	  un portait général des groupes de musique actifs en France métropolitaine.
-	  </pre>
-	<h1>Données utilisées</h1>
-      <pre>
-	  Les données utilisées proviennent de MusicBrainz (au 1er mars 2025), une base de données open source et collaborative lancée en 2000. 
-	  On peut la voir comme le "Wikipédia de la musique". Ses données sont très complètes : en plus des genres musicaux de l'artiste, 
-	  on peut y trouver leur lieu de formation, de résidence actuelle, ainsi que toutes les versions CD, vinyles ou numériques de leurs 
-	  sorties. Il existe d'autres bases de données de ce type (Discogs, RateYourMusic), mais MusicBrainz est la seule à disposer de la 
-	  localisation des groupes pour tous les types de musiques et qui propose librement ses données en téléchargement.
-	  
-	  Les "Core Data" de MusicBrainz sont distribués sous la licence CC0 : leur utilisation est complètement libre. Les 
-	  "Supplementary Data" comprennent des données entrées par les utilisateurs comme le ou les genres musicaux du groupe. Elles 
-	  distribuées avec la licence CC BY-NC-SA 3.0, permettant de modifier et de partager la donnée dans un cadre non-commercial, 
-	  en citant la source, et en redistribuant ce travail sous cette même licence.
-	  </pre>
-		  <iframe
-	        id="MusicBrainz"
-	        title="MusicBrainz"
-	        width="1000px"
-	        height="600px"
-	        src="https://musicbrainz.org/">
-	      </iframe>
-	<h1>Méthodologie</h1>
-	  <pre>
-	  Pour utiliser ces données, il faut télécharger une instance locale de la base PostgreSQL de MusicBrainz. L’installation 
-	  s’est faite sur une machine virtuelle Ubuntu LTS en utilisant docker, comme expliqué dans la documentation
-	  (https://github.com/metabrainz/musicbrainz-docker). Toutes les données utilisées proviennent des exports .csv de requêtes SQL 
-	  effectuées sur le logiciel dbeaver, et sont disponibles sur le github de ce site.
-	  
-	  Le choix a été fait de se concentrer sur les groupes français actifs et possédant une localisation au niveau de leurs villes. La carte 
-	  intéractive sous leaflet devait également montrer les groupes dont on ne connaissait pas la ville, mais le département ou la région. 
-	  Cela a été retiré car pas strictement nécessaire.  733 groupes français actifs possèdent une localisation au niveau de leur ville sur 
-	  MusicBrainz.
-	
-	  Cette carte a été réalisée en joignant la BD Admin Express (édition Février 2025) de l'IGN sur la commune de chaque groupe issu de nos 
-	  requêtes SQL (voir le github de ce site). Cette jointure joignant les groupes sur tous les homonymes de leur ville de résidence : un nettoyage 
-	  manuel a été fait. 
-	  
-	  Il a fallu simplifier la géométrie des villes sur QGIS pour limiter leur taille (de 92 mb a 4,4 mb) et exporter un geojson qui associait 
-	  tous les groupes présents dans une ville à une seule géométrie, ce qui a été fait avec un script python (voir le github de ce site).
-
-	  Les graphiques dynamiques ont été réalisées avec d3.js à partir de données présentes dans des fichiers .csv. Il y en a 4 : un histogramme, 
-	  un « wordwrap » des genres musicaux les plus communs des groupes présents sur la carte, sa déclinaison en « lollipop », et un « pie chart » 
-	  de la répartition des groupes par type de commune.
-	
-	  L’infographie a été réalisée avec QGIS et datawrapper. Ce site ne permet pas de télécharger les données en .svg sans créer un compte : certaines 
-	  images sont floues.
-	  
-	  Ce site web a été écrit « à la main » sans utiliser de framework pour des raisons de performance et pour m’améliorer à la réalisation de sites web.
-	  </pre>
-	<h1>Résultats</h1>
-	  <pre>
-	  Évidemment, cette liste de 733 artistes est très incomplète, et s'explique par différents facteurs. Déjà, la communauté musicbrainz est assez 
-	  réduite, et bien souvent la localisation des groupes n'est pas présente ou encore moins mise à jour. Le fait de n'inclure que les groupes exclut 
-	  beaucoup d'artistes d'autres genres : les artistes individuels comme les rappeurs sont de facto exclus de cette analyse dans leur grande majorité. 
-	  Le wordcloud montre la surreprésentation de groupes de métal par rapport à la réalité : cela s’explique par la base de fans mondiale pour ce genre 
-	  de musique, qui s’exporte très facilement comparé à des artistes connus seulement dans leur pays d’origine.
-	  
-	  Il existe de très nombreuses pistes d’améliorations : lister les artistes solos, inclure les artistes sans genre musical associés, intégrer 
-	  des données internationales, lister les sorties de chaque artiste, utiliser les historiques d’écoute de MusicBrainz pour jaugez la popularité 
-	  des artistes, améliorer la qualité et le nombre de graphiques, etc. 
-	  </pre>
-	<h1>Conclusion</h1>
-	  <pre>
-	  Si le site actuel ne fait qu’effleurer la surface en termes de représentation possible des données présentes dans la base, les données 
-	  géographiques en particulier sont loin d’être exhaustives. A l’heure actuelle, le site est une ébauche de ce à quoi pourrait ressembler 
-	  un site proposant une cartographie plus complète des groupes en France.
-	  </pre>
+    <h1>Informations</h1>
+	<p>
+	Site réalisé par MATHIEU Fabian (M1 OTG - 2025)
+	</p>
   </main>
 </body>
 
