@@ -1,47 +1,218 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Observatoire des territoires - PNR de la Forêt d'Orient">
+  <meta name="description" content="Dataviz - les groupes musicaux en france">
   <meta name="author" content="Fabian MATHIEU">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
-  <title>PNR - Forêt d'Orient</title>
+  <title>Dataviz</title>
   <link rel="icon" type="image/x-icon" href="img/icon.png">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
   <header>
-    <div class="pnr"><a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
-      <h1><a href="index.html">PNR de la Forêt d'Orient</a></h1>
+    <div class="pnr">
+      <a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
+      <h1><a href="index.html">Dataviz : la répartition des groupes musicaux en France</a></h1>
     </div>
     <nav class="nav">
       <ul class="ul">
-        <li class="active"><a href="index.html"><img src="img/house_white.svg" width="16" height="16">Accueil</a></li>
-        <li><a href="presentation.html"><img src="img/binoculars_green.svg" width="16" height="16">Présentation</a></li>
-        <li><a href="culture.html"><img src="img/signpost_green.svg" width="16" height="16">Patrimoine culturel</a></li>
-        <li><a href="nature.html"><img src="img/tree_green.svg" width="16" height="16">Patrimoine naturel</a></li>
-        <li><a href="amenagement.html"><img src="img/person_walking_green.svg" width="16" height="16">Aménagements du territoire</a></li>
-        <li><a href="a_propos.html"><img src="img/info_green.svg" width="16" height="16">À propos</a></li>
+        <li class="active"><a href="index.html"><img src="img/geo_white.svg" width="16" height="16">Carte</a></li>
+        <li><a href="infographie.html"><img src="img/graph_blue.svg" width="16" height="16">Infographie</a></li>
+        <li><a href="dataviz.html"><img src="img/chart_blue.svg" width="16" height="16">Dataviz</a></li>
+        <li><a href="a_propos.html"><img src="img/info_blue.svg" width="16" height="16">À propos</a></li>
       </ul>
     </nav>
   </header>
+
   <main>
-    <h1>Bienvenue sur l'observatoire du PNR de la Forêt d'Orient</h1>
-	<br>
-	<p> Cet observatoire est complémentaire au <a href="https://www.pnr-foret-orient.fr/">site officiel du parc</a>, et a comme rôle d'approfondir et d'ajouter des éléments non-présents sur le site officiel, en se basant sur d'autres sources. Des cartes intéractives, indicateurs et autres informations sont ici compilées pour se faire une idée générale du rôle et du fonctionnement du PNR de la Forêt d'Orient, situé à l'est de Troyes dans l'Aube (10). </p>
-	<br>
-	<p> Plusieurs catégories sont présentes : la partie Présentation évoque l'évolution du parc et de la signature très récente (24 mars 2025) du nouveau projet de charte. </p>
-	<br>
-	<p> Les patrimoines naturels et culturels possèdent leur propre partie, alors que l'onglet Aménagements du territoire montre l'impact qu'ont les équipes du PNR sur leur environnement. </p>
-	</p>
-	<br>
-	
-	<img class="center" src="img/accueil.jpg">
-	<p class="center"> Source : https://biodiversite.pnr-foret-orient.fr/atlas/ Crédits :<a href="https://www.flickr.com/photos/154393147@N06"> Yohann Berry</p>
+    <h1>Visualisation des groupes musicaux actifs listés sur MusicBrainz.org</h1>
+
+    <label for="genre-filter" style="margin-left:2%;">Filtrer par genre :</label>
+    <select id="genre-filter">
+      <option value="">Tous les genres</option>
+    </select>
+
+    <div id="mymap"></div>
+
+    <script>
+      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 6 });
+
+      var baselayers = {
+        fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }),
+        fond_carto: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '<a href="https://carto.com/basemaps">cartocdn</a>'
+        })
+      };
+      baselayers.fond_carto.addTo(mymap);
+
+      L.control.scale().addTo(mymap);
+      L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
+
+      let genreActif = "";
+      let geojson;
+
+      document.getElementById('genre-filter').addEventListener('change', function () {
+        genreActif = this.value;
+      });
+
+      function style(feature) {
+        const nbGroupes = feature.properties.groupes ? feature.properties.groupes.length : 0;
+        return {
+          weight: 0.5,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: 0.6,
+          fillColor: '#448aff'
+        };
+      }
+
+      var info = L.control();
+      info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+      };
+
+      info.update = function (props) {
+        if (!props) {
+          this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
+          return;
+        }
+
+        let groupesHTML = '';
+        if (props.groupes && props.groupes.length > 0) {
+          const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
+          const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
+
+          avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+          sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
+
+          const groupesTries = [...avecAnnee, ...sansAnnee];
+
+          const groupesFiltres = groupesTries.filter(g =>
+            !genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
+          );
+
+          groupesHTML = '<b>Groupes :</b><br>' + groupesFiltres.map(g => `
+            <div style="margin-bottom: 0.5em;">
+              <span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
+              <span style="font-style:italic;">${g.tags}</span>
+            </div>
+          `).join('');
+
+          if (groupesFiltres.length === 0) {
+            groupesHTML += '<i>Aucun groupe pour ce genre.</i>';
+          }
+        } else {
+          groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
+        }
+
+        this._div.innerHTML = `
+          <h4>Statistiques locales</h4>
+          <b>Commune :</b> ${props.NOM}<br>
+          <b>Population :</b> ${props.POPULATION} habitants<br>
+          <b>Statut :</b> ${props.STATUT}<br><br>
+          ${groupesHTML}
+        `;
+      };
+      info.addTo(mymap);
+
+      function highlightFeature(e) {
+        var layer = e.target;
+        layer.setStyle({
+          weight: 3,
+          color: '#FFFFFF',
+          dashArray: '',
+          fillOpacity: 0.7
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+          layer.bringToFront();
+        }
+        info.update(layer.feature.properties);
+      }
+
+      function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        info.update();
+      }
+
+		function onEachFeature(feature, layer) {
+		  layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: function (e) {
+			  layer.bindPopup(getPopupContent(feature.properties)).openPopup();
+			}
+		  });
+		}
+		
+		function getPopupContent(props) {
+		  let content = '';
+
+		  if (!props) return '';
+
+		  const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
+		  const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
+
+		  avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
+		  sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
+
+		  const groupesTries = [...avecAnnee, ...sansAnnee];
+
+		  const groupesFiltres = groupesTries.filter(g =>
+			!genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
+		  );
+		  content += `<strong>${props.NOM}</strong><br>`;
+		  content += `Population : ${props.POPULATION} habitants<br>`;
+		  content += `Statut : ${props.STATUT}<br><br>`;
+		  if (groupesFiltres.length > 0) {
+			content += '<b>Groupes :</b><br>';
+			content += `<div style="max-height: 300px; overflow-y: auto;">`;
+			content += groupesFiltres.map(g => `
+			  <div style="margin-bottom: 0.5em;">
+				<span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
+				<span style="font-style:italic;">${g.tags}</span>
+			  </div>
+			`).join('');
+		  } else {
+			content += '<i>Aucun groupe pour ce genre.</i>';
+		  }
+		  return content;
+		}
+
+      // Chargement du GeoJSON
+      fetch('data_leaflet/villes_avec_groupes.geojson')
+        .then(response => response.json())
+        .then(data => {
+          geojson = L.geoJson(data, {
+            style: style,
+            onEachFeature: onEachFeature
+          }).addTo(mymap);
+
+          const genreSet = new Set();
+          data.features.forEach(f => {
+            f.properties.groupes.forEach(g => {
+              g.tags.split(',').forEach(tag => genreSet.add(tag.trim()));
+            });
+          });
+
+          const select = document.getElementById('genre-filter');
+          [...genreSet].sort().forEach(tag => {
+            const opt = document.createElement('option');
+            opt.value = tag;
+            opt.textContent = tag;
+            select.appendChild(opt);
+          });
+        });
+    </script>
   </main>
 </body>
-
 </html>
