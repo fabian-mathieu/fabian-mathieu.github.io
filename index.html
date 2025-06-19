@@ -2,11 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Dataviz - les groupes musicaux en france">
+  <meta name="description" content="Dataviz - Mobilités durables">
   <meta name="author" content="Fabian MATHIEU">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
-  <title>Dataviz</title>
+  <title>Tableau de bord - Indicateurs de mobilité</title>
   <link rel="icon" type="image/x-icon" href="img/icon.png">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -16,31 +16,42 @@
 <body>
   <header>
     <div class="pnr">
-      <a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
-      <h1><a href="index.html">Dataviz : la répartition des groupes musicaux en France</a></h1>
+      <a href="index.html"><img class="logo" src="img/clipboard-data_blue.svg" width="64" height="105"></a>
+      <h1><a href="index.html">Tableau de bord - Mobilités durables dans l'EMS</a></h1>
     </div>
     <nav class="nav">
       <ul class="ul">
-        <li class="active"><a href="index.html"><img src="img/geo_white.svg" width="16" height="16">Carte</a></li>
-        <li><a href="infographie.html"><img src="img/graph_blue.svg" width="16" height="16">Infographie</a></li>
-        <li><a href="dataviz.html"><img src="img/chart_blue.svg" width="16" height="16">Dataviz</a></li>
+        <li class="active"><a href="index.html"><img src="img/house_white.svg" width="16" height="16">Accueil</a></li>
+        <li><a href="marche.html"><img src="img/person_walking_blue.svg" width="16" height="16">Marche</a></li>
+        <li><a href="velos.html"><img src="img/bicycle_blue.svg" width="16" height="16">Vélos</a></li>
+        <li><a href="vehicules_legers.html"><img src="img/car-front-fill_blue.svg" width="16" height="16">Véhicules légers</a></li>
+        <li><a href="bus.html"><img src="img/bus-front_blue.svg" width="16" height="16">Bus</a></li>
+        <li><a href="tram.html"><img src="img/lightrail_blue.svg" width="16" height="16">Tram</a></li>
+        <li><a href="autopartage.html"><img src="img/car-sharing_blue.svg" width="16" height="16">Autopartage</a></li>
         <li><a href="a_propos.html"><img src="img/info_blue.svg" width="16" height="16">À propos</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <h1>Visualisation des groupes musicaux actifs listés sur MusicBrainz.org</h1>
+    <h1>Visualisation des indicateurs de mobilité</h1>
 
-    <label for="genre-filter" style="margin-left:2%;">Filtrer par genre :</label>
-    <select id="genre-filter">
-      <option value="">Tous les genres</option>
+    <label for="indicateur-filter" style="margin-left:2%;">Choisir un indicateur :</label>
+    <select id="indicateur-filter">
+      <option value="part_surface_pietonne">Part surface piétonne</option>
+      <option value="pourcentage_vegetation">Pourcentage végétation</option>
+      <option value="part_surface_cyclable">Part surface cyclable</option>
+      <option value="nb_stations_velhop">Stations Vélhop</option>
+      <option value="nb_accidents_velo">Accidents vélo</option>
+      <option value="nb_bornes_ve">Bornes VE</option>
+      <option value="population_estimee">Population estimée</option>
+      <option value="bruit_moy_route_db">Bruit moyen (dB)</option>
     </select>
 
-    <div id="mymap"></div>
+    <div id="mymap" style="height: 600px;"></div>
 
     <script>
-      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 6 });
+      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
 
       var baselayers = {
         fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -55,22 +66,74 @@
       L.control.scale().addTo(mymap);
       L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
 
-      let genreActif = "";
+      let indicateurActif = "part_surface_pietonne";
       let geojson;
 
-      document.getElementById('genre-filter').addEventListener('change', function () {
-        genreActif = this.value;
+      document.getElementById('indicateur-filter').addEventListener('change', function () {
+        indicateurActif = this.value;
+        if (geojson) {
+          geojson.setStyle(style);
+        }
       });
 
+      // Fonction pour déterminer la couleur en fonction de la valeur de l'indicateur
+      function getColor(value, indicateur) {
+        if (value === null || value === undefined || value < 0) return '#CCCCCC'; // Gris pour valeurs manquantes
+        
+        switch(indicateur) {
+          case 'part_surface_pietonne':
+          case 'part_surface_cyclable':
+          case 'pourcentage_vegetation':
+            // Du vert clair au vert foncé pour les indicateurs de part
+            return value > 75 ? '#005a32' :
+                   value > 50 ? '#238b45' :
+                   value > 25 ? '#41ab5d' :
+                   value > 0 ? '#74c476' :
+                   '#f7fcf5';
+          case 'nb_stations_velhop':
+          case 'nb_bornes_ve':
+            // Du bleu clair au bleu foncé pour les infrastructures
+            return value > 5 ? '#084594' :
+                   value > 3 ? '#2171b5' :
+                   value > 1 ? '#4292c6' :
+                   value > 0 ? '#6baed6' :
+                   '#f7fbff';
+          case 'nb_accidents_velo':
+            // Du rouge clair au rouge foncé pour les accidents
+            return value > 5 ? '#99000d' :
+                   value > 3 ? '#cb181d' :
+                   value > 1 ? '#ef3b2c' :
+                   value > 0 ? '#fb6a4a' :
+                   '#fff5f0';
+          case 'population_estimee':
+            // Du orange clair au orange foncé pour la population
+            return value > 500 ? '#8c2d04' :
+                   value > 200 ? '#cc4c02' :
+                   value > 100 ? '#ec7014' :
+                   value > 0 ? '#fe9929' :
+                   '#fff5eb';
+          case 'bruit_moy_route_db':
+            // Du jaune au rouge pour le bruit
+            return value > 70 ? '#bd0026' :
+                   value > 60 ? '#f03b20' :
+                   value > 50 ? '#fd8d3c' :
+                   value > 40 ? '#feb24c' :
+                   value > 30 ? '#fed976' :
+                   '#ffffb2';
+          default:
+            return '#3388ff';
+        }
+      }
+
       function style(feature) {
-        const nbGroupes = feature.properties.groupes ? feature.properties.groupes.length : 0;
+        const valeur = feature.properties[indicateurActif];
         return {
           weight: 0.5,
           opacity: 1,
           color: 'white',
           dashArray: '3',
-          fillOpacity: 0.6,
-          fillColor: '#448aff'
+          fillOpacity: 0.7,
+          fillColor: getColor(valeur, indicateurActif)
         };
       }
 
@@ -83,44 +146,22 @@
 
       info.update = function (props) {
         if (!props) {
-          this._div.innerHTML = '<h4>Statistiques locales</h4>Survolez une commune';
+          this._div.innerHTML = '<h4>Indicateurs de mobilité</h4>Survolez un carreau';
           return;
         }
 
-        let groupesHTML = '';
-        if (props.groupes && props.groupes.length > 0) {
-          const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
-          const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
-
-          avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
-          sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
-
-          const groupesTries = [...avecAnnee, ...sansAnnee];
-
-          const groupesFiltres = groupesTries.filter(g =>
-            !genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
-          );
-
-          groupesHTML = '<b>Groupes :</b><br>' + groupesFiltres.map(g => `
-            <div style="margin-bottom: 0.5em;">
-              <span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
-              <span style="font-style:italic;">${g.tags}</span>
-            </div>
-          `).join('');
-
-          if (groupesFiltres.length === 0) {
-            groupesHTML += '<i>Aucun groupe pour ce genre.</i>';
-          }
-        } else {
-          groupesHTML = '<b>Aucun groupe musical trouvé.</b>';
-        }
+        const indicateurLabel = document.getElementById('indicateur-filter').options[document.getElementById('indicateur-filter').selectedIndex].text;
+        const valeur = props[indicateurActif] !== null && props[indicateurActif] !== undefined ? props[indicateurActif] : 'Donnée non disponible';
 
         this._div.innerHTML = `
-          <h4>Statistiques locales</h4>
-          <b>Commune :</b> ${props.NOM}<br>
-          <b>Population :</b> ${props.POPULATION} habitants<br>
-          <b>Statut :</b> ${props.STATUT}<br><br>
-          ${groupesHTML}
+          <h4>Indicateurs de mobilité</h4>
+          <b>ID carreau :</b> ${props.idINSPIRE}<br>
+          <b>${indicateurLabel} :</b> ${valeur}<br><br>
+          <b>Autres indicateurs :</b><br>
+          • Population estimée : ${props.population_estimee || 0}<br>
+          • Stations Vélhop : ${props.nb_stations_velhop || 0}<br>
+          • Bornes VE : ${props.nb_bornes_ve || 0}<br>
+          • Accidents vélo : ${props.nb_accidents_velo || 0}
         `;
       };
       info.addTo(mymap);
@@ -131,7 +172,7 @@
           weight: 3,
           color: '#FFFFFF',
           dashArray: '',
-          fillOpacity: 0.7
+          fillOpacity: 0.9
         });
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
           layer.bringToFront();
@@ -144,73 +185,62 @@
         info.update();
       }
 
-		function onEachFeature(feature, layer) {
-		  layer.on({
-			mouseover: highlightFeature,
-			mouseout: resetHighlight,
-			click: function (e) {
-			  layer.bindPopup(getPopupContent(feature.properties)).openPopup();
-			}
-		  });
-		}
-		
-		function getPopupContent(props) {
-		  let content = '';
-
-		  if (!props) return '';
-
-		  const avecAnnee = props.groupes.filter(g => g.annee && !isNaN(parseInt(g.annee)));
-		  const sansAnnee = props.groupes.filter(g => !g.annee || isNaN(parseInt(g.annee)));
-
-		  avecAnnee.sort((a, b) => parseInt(b.annee) - parseInt(a.annee));
-		  sansAnnee.sort((a, b) => a.nom.localeCompare(b.nom));
-
-		  const groupesTries = [...avecAnnee, ...sansAnnee];
-
-		  const groupesFiltres = groupesTries.filter(g =>
-			!genreActif || (g.tags && g.tags.toLowerCase().includes(genreActif.toLowerCase()))
-		  );
-		  content += `<strong>${props.NOM}</strong><br>`;
-		  content += `Population : ${props.POPULATION} habitants<br>`;
-		  content += `Statut : ${props.STATUT}<br><br>`;
-		  if (groupesFiltres.length > 0) {
-			content += '<b>Groupes :</b><br>';
-			content += `<div style="max-height: 300px; overflow-y: auto;">`;
-			content += groupesFiltres.map(g => `
-			  <div style="margin-bottom: 0.5em;">
-				<span style="font-weight:bold;">• ${g.nom}</span>${g.annee ? ` <span style="color:#777;">(${g.annee})</span>` : ''}<br>
-				<span style="font-style:italic;">${g.tags}</span>
-			  </div>
-			`).join('');
-		  } else {
-			content += '<i>Aucun groupe pour ce genre.</i>';
-		  }
-		  return content;
-		}
+      function onEachFeature(feature, layer) {
+        layer.on({
+          mouseover: highlightFeature,
+          mouseout: resetHighlight,
+          click: function (e) {
+            layer.bindPopup(getPopupContent(feature.properties)).openPopup();
+          }
+        });
+      }
+      
+      function getPopupContent(props) {
+        if (!props) return '';
+        
+        const indicateurLabel = document.getElementById('indicateur-filter').options[document.getElementById('indicateur-filter').selectedIndex].text;
+        const valeur = props[indicateurActif] !== null && props[indicateurActif] !== undefined ? props[indicateurActif] : 'Donnée non disponible';
+        
+        let content = `
+          <div style="max-width: 300px;">
+            <h4>Détails du carreau</h4>
+            <b>ID :</b> ${props.idINSPIRE}<br>
+            <b>Indicateur actuel (${indicateurLabel}) :</b> ${valeur}<br><br>
+            
+            <b>Indicateurs piétons :</b><br>
+            • Part surface piétonne : ${props.part_surface_pietonne || 0}%<br>
+            • Longueur voies lentes : ${props.longueur_lente ? props.longueur_lente.toFixed(1) : 0}m<br><br>
+            
+            <b>Indicateurs vélo :</b><br>
+            • Part surface cyclable : ${props.part_surface_cyclable || 0}%<br>
+            • Stations Vélhop : ${props.nb_stations_velhop || 0}<br>
+            • Accidents vélo : ${props.nb_accidents_velo || 0}<br><br>
+            
+            <b>Indicateurs véhicules :</b><br>
+            • Bornes VE : ${props.nb_bornes_ve || 0}<br>
+            • Bruit moyen : ${props.bruit_moy_route_db || '?'} dB<br>
+            • Pente moyenne : ${props.pente_moyenne ? props.pente_moyenne.toFixed(1) : '?'}%
+          </div>
+        `;
+        
+        return content;
+      }
 
       // Chargement du GeoJSON
-      fetch('data_leaflet/villes_avec_groupes.geojson')
+      fetch('data_leaflet/carreaux_200m_avec_donnees.geojson')
         .then(response => response.json())
         .then(data => {
+          // Conversion des coordonnées EPSG:3857 en WGS84 si nécessaire
           geojson = L.geoJson(data, {
             style: style,
             onEachFeature: onEachFeature
           }).addTo(mymap);
-
-          const genreSet = new Set();
-          data.features.forEach(f => {
-            f.properties.groupes.forEach(g => {
-              g.tags.split(',').forEach(tag => genreSet.add(tag.trim()));
-            });
-          });
-
-          const select = document.getElementById('genre-filter');
-          [...genreSet].sort().forEach(tag => {
-            const opt = document.createElement('option');
-            opt.value = tag;
-            opt.textContent = tag;
-            select.appendChild(opt);
-          });
+          
+          // Ajuster la vue pour afficher toutes les données
+          mymap.fitBounds(geojson.getBounds());
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement des données:', error);
         });
     </script>
   </main>
