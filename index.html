@@ -11,6 +11,20 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .data-toggle {
+      margin: 10px;
+      padding: 8px 15px;
+      background: #448aff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .data-toggle.active {
+      background: #0056b3;
+    }
+  </style>
 </head>
 
 <body>
@@ -36,22 +50,15 @@
   <main>
     <h1>Visualisation des indicateurs de mobilité</h1>
 
-    <label for="indicateur-filter" style="margin-left:2%;">Choisir un indicateur :</label>
-    <select id="indicateur-filter">
-      <option value="part_surface_pietonne">Part surface piétonne</option>
-      <option value="pourcentage_vegetation">Pourcentage végétation</option>
-      <option value="part_surface_cyclable">Part surface cyclable</option>
-      <option value="nb_stations_velhop">Stations Vélhop</option>
-      <option value="nb_accidents_velo">Accidents vélo</option>
-      <option value="nb_bornes_ve">Bornes VE</option>
-      <option value="population_estimee">Population estimée</option>
-      <option value="bruit_moy_route_db">Bruit moyen (dB)</option>
-    </select>
+    <div style="margin-left:2%; margin-bottom:10px;">
+      <button id="toggle-raw" class="data-toggle active">Données brutes</button>
+      <button id="toggle-normalized" class="data-toggle">Données normalisées</button>
+    </div>
 
     <div id="mymap" style="height: 600px;"></div>
 
     <script>
-      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 6 });
+      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
 
       var baselayers = {
         fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -66,77 +73,34 @@
       L.control.scale().addTo(mymap);
       L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
 
-      let indicateurActif = "part_surface_pietonne";
-      let geojson;
+      let currentData = 'raw'; // 'raw' or 'normalized'
+      let rawGeojson, normalizedGeojson;
 
-      document.getElementById('indicateur-filter').addEventListener('change', function () {
-        indicateurActif = this.value;
-        if (geojson) {
-          geojson.setStyle(style);
-        }
-      });
-
-      // Fonction pour déterminer la couleur en fonction de la valeur de l'indicateur
-      function getColor(value, indicateur) {
-        if (value === null || value === undefined || value < 0) return '#CCCCCC'; // Gris pour valeurs manquantes
-        
-        switch(indicateur) {
-          case 'part_surface_pietonne':
-          case 'part_surface_cyclable':
-          case 'pourcentage_vegetation':
-            // Du vert clair au vert foncé pour les indicateurs de part
-            return value > 75 ? '#005a32' :
-                   value > 50 ? '#238b45' :
-                   value > 25 ? '#41ab5d' :
-                   value > 0 ? '#74c476' :
-                   '#f7fcf5';
-          case 'nb_stations_velhop':
-          case 'nb_bornes_ve':
-            // Du bleu clair au bleu foncé pour les infrastructures
-            return value > 5 ? '#084594' :
-                   value > 3 ? '#2171b5' :
-                   value > 1 ? '#4292c6' :
-                   value > 0 ? '#6baed6' :
-                   '#f7fbff';
-          case 'nb_accidents_velo':
-            // Du rouge clair au rouge foncé pour les accidents
-            return value > 5 ? '#99000d' :
-                   value > 3 ? '#cb181d' :
-                   value > 1 ? '#ef3b2c' :
-                   value > 0 ? '#fb6a4a' :
-                   '#fff5f0';
-          case 'population_estimee':
-            // Du orange clair au orange foncé pour la population
-            return value > 500 ? '#8c2d04' :
-                   value > 200 ? '#cc4c02' :
-                   value > 100 ? '#ec7014' :
-                   value > 0 ? '#fe9929' :
-                   '#fff5eb';
-          case 'bruit_moy_route_db':
-            // Du jaune au rouge pour le bruit
-            return value > 70 ? '#bd0026' :
-                   value > 60 ? '#f03b20' :
-                   value > 50 ? '#fd8d3c' :
-                   value > 40 ? '#feb24c' :
-                   value > 30 ? '#fed976' :
-                   '#ffffb2';
-          default:
-            return '#3388ff';
-        }
-      }
-
-      function style(feature) {
-        const valeur = feature.properties[indicateurActif];
+      // Style de base pour les mailles
+      function getBaseStyle() {
         return {
           weight: 0.5,
           opacity: 1,
           color: 'white',
           dashArray: '3',
           fillOpacity: 0.7,
-          fillColor: getColor(valeur, indicateurActif)
+          fillColor: '#3388ff'
         };
       }
 
+      // Style pour les valeurs manquantes
+      function getMissingDataStyle() {
+        return {
+          weight: 0.5,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: 0.7,
+          fillColor: '#CCCCCC'
+        };
+      }
+
+      // Contrôle d'information
       var info = L.control();
       info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info');
@@ -150,22 +114,16 @@
           return;
         }
 
-        const indicateurLabel = document.getElementById('indicateur-filter').options[document.getElementById('indicateur-filter').selectedIndex].text;
-        const valeur = props[indicateurActif] !== null && props[indicateurActif] !== undefined ? props[indicateurActif] : 'Donnée non disponible';
-
         this._div.innerHTML = `
           <h4>Indicateurs de mobilité</h4>
           <b>ID carreau :</b> ${props.idINSPIRE}<br>
-          <b>${indicateurLabel} :</b> ${valeur}<br><br>
-          <b>Autres indicateurs :</b><br>
-          • Population estimée : ${props.population_estimee || 0}<br>
-          • Stations Vélhop : ${props.nb_stations_velhop || 0}<br>
-          • Bornes VE : ${props.nb_bornes_ve || 0}<br>
-          • Accidents vélo : ${props.nb_accidents_velo || 0}
+          <b>Type de données :</b> ${currentData === 'raw' ? 'Brutes' : 'Normalisées'}<br>
+          <small>Cliquez pour voir tous les indicateurs</small>
         `;
       };
       info.addTo(mymap);
 
+      // Fonctions pour gérer le survol
       function highlightFeature(e) {
         var layer = e.target;
         layer.setStyle({
@@ -181,10 +139,15 @@
       }
 
       function resetHighlight(e) {
-        geojson.resetStyle(e.target);
+        if (currentData === 'raw' && rawGeojson) {
+          rawGeojson.resetStyle(e.target);
+        } else if (currentData === 'normalized' && normalizedGeojson) {
+          normalizedGeojson.resetStyle(e.target);
+        }
         info.update();
       }
 
+      // Fonction pour chaque feature
       function onEachFeature(feature, layer) {
         layer.on({
           mouseover: highlightFeature,
@@ -195,53 +158,115 @@
         });
       }
       
+      // Création du contenu du popup
       function getPopupContent(props) {
         if (!props) return '';
         
-        const indicateurLabel = document.getElementById('indicateur-filter').options[document.getElementById('indicateur-filter').selectedIndex].text;
-        const valeur = props[indicateurActif] !== null && props[indicateurActif] !== undefined ? props[indicateurActif] : 'Donnée non disponible';
+        let content = `<div style="max-width: 400px; max-height: 500px; overflow-y: auto;">
+          <h4>Détails du carreau (${currentData === 'raw' ? 'Données brutes' : 'Données normalisées'})</h4>
+          <b>ID :</b> ${props.idINSPIRE}<br><br>
+          <table style="width:100%; border-collapse: collapse;">
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Indicateur</th>
+              <th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Valeur</th>
+            </tr>`;
         
-        let content = `
-          <div style="max-width: 300px;">
-            <h4>Détails du carreau</h4>
-            <b>ID :</b> ${props.idINSPIRE}<br>
-            <b>Indicateur actuel (${indicateurLabel}) :</b> ${valeur}<br><br>
-            
-            <b>Indicateurs piétons :</b><br>
-            • Part surface piétonne : ${props.part_surface_pietonne || 0}%<br>
-            • Longueur voies lentes : ${props.longueur_lente ? props.longueur_lente.toFixed(1) : 0}m<br><br>
-            
-            <b>Indicateurs vélo :</b><br>
-            • Part surface cyclable : ${props.part_surface_cyclable || 0}%<br>
-            • Stations Vélhop : ${props.nb_stations_velhop || 0}<br>
-            • Accidents vélo : ${props.nb_accidents_velo || 0}<br><br>
-            
-            <b>Indicateurs véhicules :</b><br>
-            • Bornes VE : ${props.nb_bornes_ve || 0}<br>
-            • Bruit moyen : ${props.bruit_moy_route_db || '?'} dB<br>
-            • Pente moyenne : ${props.pente_moyenne ? props.pente_moyenne.toFixed(1) : '?'}%
-          </div>
-        `;
+        // Trier les propriétés par ordre alphabétique
+        const sortedProps = Object.keys(props).sort();
         
+        for (const key of sortedProps) {
+          if (key === 'idINSPIRE' || key === 'geometry') continue;
+          
+          let value = props[key];
+          // Formater les nombres
+          if (typeof value === 'number') {
+            value = Number.isInteger(value) ? value : value.toFixed(2);
+          }
+          
+          // Mettre en évidence les valeurs manquantes
+          const isMissing = value === -1 || value === null || value === undefined;
+          
+          content += `
+            <tr>
+              <td style="padding: 6px; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${key}</td>
+              <td style="padding: 6px; text-align: right; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${isMissing ? 'N/A' : value}</td>
+            </tr>`;
+        }
+        
+        content += `</table></div>`;
         return content;
       }
 
-      // Chargement du GeoJSON
-      fetch('data_leaflet/carreaux_200m_avec_donnees.geojson')
-        .then(response => response.json())
-        .then(data => {
-          // Conversion des coordonnées EPSG:3857 en WGS84 si nécessaire
-          geojson = L.geoJson(data, {
-            style: style,
-            onEachFeature: onEachFeature
-          }).addTo(mymap);
-          
-          // Ajuster la vue pour afficher toutes les données
-          mymap.fitBounds(geojson.getBounds());
-        })
-        .catch(error => {
-          console.error('Erreur lors du chargement des données:', error);
-        });
+      // Chargement des données brutes
+      function loadRawData() {
+        return fetch('data_leaflet/maille_200m_avec_donnees.geojson')
+          .then(response => response.json())
+          .then(data => {
+            if (rawGeojson) {
+              mymap.removeLayer(rawGeojson);
+            }
+            rawGeojson = L.geoJson(data, {
+              style: getBaseStyle,
+              onEachFeature: onEachFeature
+            });
+            return rawGeojson;
+          });
+      }
+
+      // Chargement des données normalisées
+      function loadNormalizedData() {
+        return fetch('data_leaflet/maille_200m_avec_donnees_normalise.geojson')
+          .then(response => response.json())
+          .then(data => {
+            if (normalizedGeojson) {
+              mymap.removeLayer(normalizedGeojson);
+            }
+            normalizedGeojson = L.geoJson(data, {
+              style: getBaseStyle,
+              onEachFeature: onEachFeature
+            });
+            return normalizedGeojson;
+          });
+      }
+
+      // Basculer entre les données brutes et normalisées
+      function toggleData(type) {
+        currentData = type;
+        
+        // Mettre à jour les boutons
+        document.getElementById('toggle-raw').classList.toggle('active', type === 'raw');
+        document.getElementById('toggle-normalized').classList.toggle('active', type === 'normalized');
+        
+        // Charger les données si nécessaire et les afficher
+        if (type === 'raw') {
+          if (!rawGeojson) {
+            loadRawData().then(geojson => {
+              geojson.addTo(mymap);
+              mymap.fitBounds(geojson.getBounds());
+            });
+          } else {
+            if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
+            rawGeojson.addTo(mymap);
+          }
+        } else {
+          if (!normalizedGeojson) {
+            loadNormalizedData().then(geojson => {
+              geojson.addTo(mymap);
+              mymap.fitBounds(geojson.getBounds());
+            });
+          } else {
+            if (rawGeojson) mymap.removeLayer(rawGeojson);
+            normalizedGeojson.addTo(mymap);
+          }
+        }
+      }
+
+      // Écouteurs d'événements pour les boutons
+      document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
+      document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
+
+      // Chargement initial des données brutes
+      toggleData('raw');
     </script>
   </main>
 </body>
