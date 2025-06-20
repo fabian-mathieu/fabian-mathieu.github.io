@@ -60,7 +60,18 @@
       L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
 
       let currentData = 'raw'; // 'raw' or 'normalized'
-      let rawGeojson, normalizedGeojson;
+      let rawGeojson, normalizedGeojson, epciLayer;
+
+      // Style pour les limites EPCI
+      function getEpciStyle() {
+        return {
+          color: '#000000',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0, // Transparent à l'intérieur
+          dashArray: null
+        };
+      }
 
       // Style de base pour les mailles
       function getBaseStyle() {
@@ -148,7 +159,7 @@
       function getPopupContent(props) {
         if (!props) return '';
         
-        let content = `<div style="max-width: 400px; max-height: 500px; overflow-y: auto;">
+        let content = `<div style="max-width: 500px; max-height: 500px; overflow-y: auto;">
           <h4>Détails du carreau (${currentData === 'raw' ? 'Données brutes' : 'Données normalisées'})</h4>
           <b>ID :</b> ${props.idINSPIRE}<br><br>
           <table style="width:100%; border-collapse: collapse;">
@@ -181,6 +192,19 @@
         
         content += `</table></div>`;
         return content;
+      }
+
+      // Chargement des limites EPCI
+      function loadEpciLayer() {
+        return fetch('data_leaflet/limites_epci.geojson')
+          .then(response => response.json())
+          .then(data => {
+            epciLayer = L.geoJson(data, {
+              style: getEpciStyle,
+              interactive: false // Désactive les interactions pour cette couche
+            });
+            return epciLayer;
+          });
       }
 
       // Chargement des données brutes
@@ -251,8 +275,18 @@
       document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
       document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
 
-      // Chargement initial des données brutes
-      toggleData('raw');
+      // Chargement initial
+      Promise.all([
+        loadEpciLayer(),
+        loadRawData()
+      ]).then(([epci, rawData]) => {
+        // Ajouter les couches à la carte
+        epci.addTo(mymap);
+        rawData.addTo(mymap);
+        
+        // Ajuster la vue pour afficher toutes les données
+        mymap.fitBounds(rawData.getBounds());
+      });
     </script>
   </main>
 </body>
