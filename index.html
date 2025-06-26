@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- charger les données du .csv -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
@@ -34,7 +36,77 @@
   </header>
 
   <main>
+  
     <h1>Visualisation des indicateurs de mobilité</h1>
+	
+	<!-- Section pour les indicateurs composites -->
+    <div class="indicateurs-container" style="margin: 20px 2%; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/person_walking_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Marche</div>
+          <div class="progress-bar" id="marche-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="marche-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/bicycle_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Vélos</div>
+          <div class="progress-bar" id="velos-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="velos-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/bus-front_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Bus</div>
+          <div class="progress-bar" id="bus-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="bus-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/lightrail_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Tram</div>
+          <div class="progress-bar" id="tram-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="tram-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/car-front-fill_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Véhicules légers</div>
+          <div class="progress-bar" id="vl-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="vl-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+
+      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
+        <img src="img/car-sharing_blue.svg" width="24" height="24" style="margin-right: 10px;">
+        <div style="flex-grow: 1;">
+          <div>Autopartage</div>
+          <div class="progress-bar" id="autopartage-progress" style="height: 20px; background: #e0e0e0; border-radius: 10px; margin-top: 5px;">
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+          </div>
+          <div id="autopartage-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+      </div>
+    </div>
 
     <div style="margin-left:2%; margin-bottom:10px;">
       <button id="toggle-raw" class="data-toggle active">Données brutes</button>
@@ -44,6 +116,111 @@
     <div id="mymap" style="height: 600px;"></div>
 
     <script>
+	<!-- Script pour récupérer les données du .csv -->
+	let labelDict = {};
+
+	function loadLabels() {
+	  return new Promise((resolve, reject) => {
+		Papa.parse("data_web/labels.csv", {
+		  download: true,
+		  header: true,
+		  complete: function(results) {
+			results.data.forEach(row => {
+			  if (row.champ && row.label) {
+				labelDict[row.champ] = row.label;
+			  }
+			});
+			resolve();
+		  },
+		  error: reject
+		});
+	  });
+	}
+	
+	<!-- Script pour l'affichage des moyennes -->
+	      // Fonction pour calculer et afficher les moyennes
+      function updateIndicateursComposites(data) {
+        const indicators = {
+          marche: { sum: 0, count: 0 },
+          velos: { sum: 0, count: 0 },
+          bus: { sum: 0, count: 0 },
+          tram: { sum: 0, count: 0 },
+          vl: { sum: 0, count: 0 },
+          autopartage: { sum: 0, count: 0 }
+        };
+
+        // Calcul des sommes
+        data.features.forEach(feature => {
+          const props = feature.properties;
+          if (props.ind_compose_marche !== -1) {
+            indicators.marche.sum += props.ind_compose_marche;
+            indicators.marche.count++;
+          }
+          if (props.ind_compose_velos !== -1) {
+            indicators.velos.sum += props.ind_compose_velos;
+            indicators.velos.count++;
+          }
+          if (props.ind_compose_bus !== -1) {
+            indicators.bus.sum += props.ind_compose_bus;
+            indicators.bus.count++;
+          }
+          if (props.ind_compose_tram !== -1) {
+            indicators.tram.sum += props.ind_compose_tram;
+            indicators.tram.count++;
+          }
+          if (props.ind_compose_vl !== -1) {
+            indicators.vl.sum += props.ind_compose_vl;
+            indicators.vl.count++;
+          }
+          if (props.ind_compose_autopartage !== -1) {
+            indicators.autopartage.sum += props.ind_compose_autopartage;
+            indicators.autopartage.count++;
+          }
+        });
+
+        // Calcul et affichage des moyennes
+        for (const [key, value] of Object.entries(indicators)) {
+          const avg = value.count > 0 ? (value.sum / value.count) : 0;
+          const percent = (avg * 100).toFixed(0);
+          const formattedValue = avg.toFixed(2);
+          
+          document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
+          document.getElementById(`${key}-value`).textContent = formattedValue;
+        }
+      }
+
+      // Chargement des données normalisées
+      function loadNormalizedData() {
+        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
+          .then(response => response.json())
+          .then(data => {
+            if (normalizedGeojson) {
+              mymap.removeLayer(normalizedGeojson);
+            }
+            normalizedGeojson = L.geoJson(data, {
+              style: getBaseStyle,
+              onEachFeature: onEachFeature
+            });
+            
+            // Mise à jour des indicateurs composites
+            updateIndicateursComposites(data);
+            
+            return normalizedGeojson;
+          });
+      }
+		// Chargement des noms corrects des indicateurs
+		loadLabels().then(() => {
+		  Promise.all([
+			loadEpciLayer(),
+			loadRawData()
+		  ]).then(([epci, rawData]) => {
+			epci.addTo(mymap);
+			rawData.addTo(mymap);
+			mymap.fitBounds(rawData.getBounds());
+		  });
+		});
+
+
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
 
       var baselayers = {
@@ -156,47 +333,45 @@
       }
       
       // Création du contenu du popup
-      function getPopupContent(props) {
-        if (!props) return '';
-        
-        let content = `<div style="max-width: 500px; max-height: 500px; overflow-y: auto;">
-          <h4>Détails du carreau (${currentData === 'raw' ? 'Données brutes' : 'Données normalisées'})</h4>
-          <b>ID :</b> ${props.idINSPIRE}<br><br>
-          <table style="width:100%; border-collapse: collapse;">
-            <tr style="background-color: #f2f2f2;">
-              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Indicateur</th>
-              <th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Valeur</th>
-            </tr>`;
-        
-        // Trier les propriétés par ordre alphabétique
-        const sortedProps = Object.keys(props).sort();
-        
-        for (const key of sortedProps) {
-          if (key === 'idINSPIRE' || key === 'geometry') continue;
-          
-          let value = props[key];
-          // Formater les nombres
-          if (typeof value === 'number') {
-            value = Number.isInteger(value) ? value : value.toFixed(2);
-          }
-          
-          // Mettre en évidence les valeurs manquantes
-          const isMissing = value === -1 || value === null || value === undefined;
-          
-          content += `
-            <tr>
-              <td style="padding: 6px; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${key}</td>
-              <td style="padding: 6px; text-align: right; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${isMissing ? 'N/A' : value}</td>
-            </tr>`;
-        }
-        
-        content += `</table></div>`;
-        return content;
-      }
+		function getPopupContent(props) {
+		  if (!props) return '';
+
+		  let content = `<div style="max-width: 500px; max-height: 500px; overflow-y: auto;">
+			<h4>Détails du carreau (${currentData === 'raw' ? 'Données brutes' : 'Données normalisées'})</h4>
+			<b>ID :</b> ${props.idINSPIRE}<br><br>
+			<table style="width:100%; border-collapse: collapse;">
+			  <tr style="background-color: #f2f2f2;">
+				<th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Indicateur</th>
+				<th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Valeur</th>
+			  </tr>`;
+
+		  const sortedProps = Object.keys(props).sort();
+
+		  for (const key of sortedProps) {
+			if (key === 'idINSPIRE' || key === 'geometry') continue;
+
+			let value = props[key];
+			if (typeof value === 'number') {
+			  value = Number.isInteger(value) ? value : value.toFixed(2);
+			}
+
+			const isMissing = value === -1 || value === null || value === undefined;
+			const label = labelDict[key] || key; // nom lisible si défini dans labelDict
+
+			content += `
+			  <tr>
+				<td style="padding: 6px; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${label}</td>
+				<td style="padding: 6px; text-align: right; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${isMissing ? 'N/A' : value}</td>
+			  </tr>`;
+		  }
+
+		  content += `</table></div>`;
+		  return content;
+		}
 
       // Chargement des limites EPCI
       function loadEpciLayer() {
-        return fetch('data_leaflet/limites_epci.geojson')
+        return fetch('data/limites_epci.geojson')
           .then(response => response.json())
           .then(data => {
             epciLayer = L.geoJson(data, {
@@ -209,7 +384,7 @@
 
       // Chargement des données brutes
       function loadRawData() {
-        return fetch('data_leaflet/maille_200m_avec_donnees.geojson')
+        return fetch('data/maille_200m_avec_donnees.geojson')
           .then(response => response.json())
           .then(data => {
             if (rawGeojson) {
@@ -225,7 +400,7 @@
 
       // Chargement des données normalisées
       function loadNormalizedData() {
-        return fetch('data_leaflet/maille_200m_avec_donnees_normalise.geojson')
+        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
           .then(response => response.json())
           .then(data => {
             if (normalizedGeojson) {

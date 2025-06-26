@@ -1,0 +1,53 @@
+nom+AF8-colonnenom+AF8-complettypesources
+part+AF8-surface+AF8-pietonnePart de la surface accessible par le r+AOk-seau p+AOk-destremarche
+part+AF8-vegetationPart de la surface occup+AOk-e par la v+AOk-g+AOk-tationmarche
+ratio+AF8-hl+AF8-bati+AF8-ruesRapport moyen entre la hauteur des b+AOI-timents et la largeur des ruesmarche
+part+AF8-routes+AF8-lentesPart des rues dont la moyenne est de moins de 30 km /hmarche+ADs-velos
+part+AF8-routes+AF8-inaccessibles+AF8-vlPart des rues inaccessibles aux VLmarche+ADs-velos
+part+AF8-parcsPart des parcs dans l'aire urbaine marche
+marche+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (marche)marche
+marche+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (marche)marche
+part+AF8-surface+AF8-cyclablePart de la surface accessible par le r+AOk-seau cyclable velos
+part+AF8-normalise+AF8-surface+AF8-couverte+AF8-stations+AF8-velosPart de la surface +AOA- moins de 400m d+IBk-une station V+AOk-lhopvelos
+part+AF8-routes+AF8-interdites+AF8-plPart des rues interdites aux poids lourdsvelos
+part+AF8-routes+AF8-paveesPart de rues pav+AOk-esvelos
+pente+AF8-moyenne+AF8-absoluePente moyenne des rues (valeur absolue)velos
+part+AF8-normalise+AF8-couverte+AF8-stations+AF8-rep+AF8-velosPart de la surface +AOA- moins de 400m d+IBk-une station d+IBk-autor+AOk-paration de v+AOk-losvelos
+velos+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (marche)velos
+velos+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (marche)velos
+att+AF8-moy+AF8-semaine+AF8-busTemps d+IBk-attente moyen hebdomadaire pour un busbus
+cout+AF8-horaire+AF8-busCo+APs-t horaire (+IKw- / h)bus
+ratio+AF8-arrets+AF8-pr+AF8-busPart des arr+AOo-ts de bus disposant d+IBk-un parking relais +AOA- moins de 400 m+AOg-tresbus
+ratio+AF8-arrets+AF8-autopartage+AF8-busPart des arr+AOo-ts de busdisposant d+IBk-une station d+IBk-autopartage +AOA- moins de 400 m+AOg-tresbus
+part+AF8-routes+AF8-busPart des routes r+AOk-serv+AOk-es aux busbus
+part+AF8-batie+AF8-autour+AF8-arrets+AF8-busPart de surface b+AOI-tie autour des arr+AOo-ts de busbus
+marche+AF8-bus+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (bus)bus
+marche+AF8-bus+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (bus)bus
+att+AF8-moy+AF8-semaine+AF8-tramTemps d+IBk-attente moyen hebdomadaire pour un tramtram
+cout+AF8-horaire+AF8-tramCo+APs-t horaire (+IKw- / h)tram
+ratio+AF8-arrets+AF8-pr+AF8-tramPart des arr+AOo-ts de tram disposant d+IBk-un parking relais +AOA- moins de 400 m+AOg-trestram
+ratio+AF8-arrets+AF8-autopartage+AF8-tramPart des arr+AOo-ts de tram disposant d+IBk-une station d+IBk-autopartage +AOA- moins de 400 m+AOg-trestram
+part+AF8-routes+AF8-tramPart des routes r+AOk-serv+AOk-es aux tramtram
+part+AF8-batie+AF8-autour+AF8-arrets+AF8-tramPart de surface b+AOI-tie autour des arr+AOo-ts de tramtram
+marche+AF8-tram+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (tram)tram
+marche+AF8-tram+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (tram)tram
+part+AF8-normalise+AF8-couverte+AF8-autopartagePart de surface pr+AOk-sente +AOA- moins de 400 m+AOg-tres d+IBk-une station d+IBk-autopartageautopartage
+autopartage+AF8-cout+AF8-rapport+AF8-revenuCo+APs-t horaire d+IBk-utilisation d+IBk-un v+AOk-hicule en autopartage rapport+AOk- au revenu m+AOk-dian de la population (2021)autopartage
+part+AF8-routes+AF8-accessibles+AF8-vlPart des routes accessibles aux v+AOk-hiculesautopartage
+part+AF8-surface+AF8-geofencing+AF8-citizPart de surface couverte par des zones de d+AOk-pose+AC0-libre Citizautopartage
+autopartage+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (autopartage)autopartage
+autopartage+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (autopartage)autopartage
+part+AF8-sens+AF8-uniquePart des routes +AOA- sens uniquevl
+part+AF8-zfePart couverte par des r+AOk-glementations antipollutionvl
+nb+AF8-feux+AF8-circulationNombre de feux de circulationvl
+places+AF8-stationnement+AF8-par+AF8-habitantNombre de places de stationnement par habitantvl
+cout+AF8-moyen+AF8-stationnementCo+APs-t moyen horaire du stationnementvl
+bornes+AF8-ve+AF8-par+AF8-habitantNombre de borne de recharge pour v+AOk-hicules +AOk-lectriques par habitantvl
+vl+AF8-ratio+AF8-emploisPart des emplois accessibles en moins de 15 minutes (v+AOk-hicules l+AOk-gers)vl
+vl+AF8-ratio+AF8-services+AF8-dom+AF8-moyennePart des services accessibles en moins de 15 minutes (v+AOk-hicules l+AOk-gers)vl
+HSMI+AF8-globalIndice de mixit+AOk- logement +IBM- servicesdiversite+AF8-fonctionnelle
+HEMIIndice de mixit+AOk- logement +IBM- emploisdiversite+AF8-fonctionnelle
+part+AF8-marchePart de navetteurs utilisant principalement la marcheschema+AF8-mobilite
+part+AF8-velosPart de navetteurs utilisant principalement le v+AOk-loschema+AF8-mobilite
+part+AF8-communsPart de navetteurs utilisant principalement les transports en communschema+AF8-mobilite
+part+AF8-vlPart de navetteurs utilisant principalement les v+AOk-hicules l+AOk-gersschema+AF8-mobilite
