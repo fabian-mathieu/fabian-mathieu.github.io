@@ -339,6 +339,10 @@
 		  document.getElementById("theme-select").addEventListener("change", (e) => {
 			populateIndicatorSelect(e.target.value);
 		  });
+		  document.getElementById("indicator-select").addEventListener("change", (e) => {
+			selectedIndicator = e.target.value || null;
+			recolorMap();
+		});
 		});
 
 
@@ -554,6 +558,7 @@
           } else {
             if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
             rawGeojson.addTo(mymap);
+			recolorMap();
           }
         } else {
           if (!normalizedGeojson) {
