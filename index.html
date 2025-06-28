@@ -179,13 +179,36 @@
 	}
 
 	function recolorMap() {
+	  if (!selectedIndicator) {
+		legend.update(null);
+		return;
+	  }
+
 	  if (currentData === 'raw' && rawGeojson) {
+		const features = rawGeojson.getLayers().map(l => l.feature);
+		const values = features.map(f => f.properties[selectedIndicator])
+		  .filter(v => v !== -1 && v != null && !isNaN(v));
+		const min = Math.min(...values);
+		const max = Math.max(...values);
+
 		rawGeojson.eachLayer(layer => {
 		  const style = getDynamicStyle(layer.feature);
 		  layer.setStyle(style);
 		});
+
+		legend.update(selectedIndicator, min, max, false);
+	  }
+
+	  if (currentData === 'normalized' && normalizedGeojson) {
+		normalizedGeojson.eachLayer(layer => {
+		  const style = getDynamicStyle(layer.feature);
+		  layer.setStyle(style);
+		});
+
+		legend.update(selectedIndicator, 0, 1, true);
 	  }
 	}
+
 
 
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
@@ -407,19 +430,32 @@
         return this._div;
       };
 
-      info.update = function (props) {
-        if (!props) {
-          this._div.innerHTML = '<h4>Indicateurs de mobilité</h4>Survolez un carreau';
-          return;
-        }
+		info.update = function (props) {
+		  if (!props) {
+			this._div.innerHTML = '<h4>Indicateurs de mobilité</h4>Survolez un carreau';
+			return;
+		  }
 
-        this._div.innerHTML = `
-          <h4>Indicateurs de mobilité</h4>
-          <b>ID carreau :</b> ${props.idINSPIRE}<br>
-          <b>Type de données :</b> ${currentData === 'raw' ? 'Brutes' : 'Normalisées'}<br>
-          <small>Cliquez pour voir tous les indicateurs</small>
-        `;
-      };
+		  const id = props.idINSPIRE || '—';
+		  const type = currentData === 'raw' ? 'Brutes' : 'Normalisées';
+
+		  let indicateurTexte = '';
+		  if (selectedIndicator && selectedIndicator in props) {
+			const val = props[selectedIndicator];
+			const affichage = (val === -1 || val == null || isNaN(val)) ? 'N/A' : parseFloat(val).toFixed(2);
+			const nom = labelDict[selectedIndicator] || selectedIndicator;
+			indicateurTexte = `<br><b>${nom} :</b> ${affichage}`;
+		  }
+
+		  this._div.innerHTML = `
+			<h4>Indicateurs de mobilité</h4>
+			<b>ID carreau :</b> ${id}<br>
+			<b>Type de données :</b> ${type}
+			${indicateurTexte}
+			<br><small>Cliquez pour voir tous les indicateurs</small>
+		  `;
+		};
+
       info.addTo(mymap);
 
       // Fonctions pour gérer le survol
@@ -593,6 +629,48 @@
 			  updateIndicateursComposites(normalizedData);
 			});
 		});
+		
+		// Légende dynamique (ajoutée à droite)
+		var legend = L.control({ position: 'bottomright' });
+
+		legend.onAdd = function () {
+		  const div = L.DomUtil.create('div', 'info legend');
+		  div.style.background = 'white';
+		  div.style.padding = '10px';
+		  div.style.borderRadius = '5px';
+		  div.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
+		  div.innerHTML = '<b>Légende</b><br>—<br><i>Aucun indicateur</i>';
+		  this._div = div;
+		  return div;
+		};
+
+		legend.update = function (indicatorName, min, max, isNormalized) {
+		  if (!indicatorName) {
+			this._div.innerHTML = '<b>Légende</b><br>—<br><i>Aucun indicateur</i>';
+			return;
+		  }
+
+		  let scale = '';
+		  if (isNormalized) {
+			scale = `
+			  <div style="height: 10px; background: linear-gradient(to right, red, green); margin: 5px 0;"></div>
+			  <div style="display: flex; justify-content: space-between;">
+				<span>0</span><span>1</span>
+			  </div>`;
+		  } else {
+			scale = `
+			  <div style="height: 10px; background: linear-gradient(to right, rgb(230,240,255), rgb(100,80,255)); margin: 5px 0;"></div>
+			  <div style="display: flex; justify-content: space-between;">
+				<span>${min.toFixed(2)}</span><span>${max.toFixed(2)}</span>
+			  </div>`;
+		  }
+
+		  this._div.innerHTML = `<b>${labelDict[indicatorName] || indicatorName}</b><br>${scale}`;
+		};
+
+		legend.addTo(mymap);
+
+
 
     </script>
   </main>
