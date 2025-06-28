@@ -126,9 +126,9 @@
 		  header: true,
 		  complete: function(results) {
 			results.data.forEach(row => {
-			  if (row.champ && row.label) {
-				labelDict[row.champ] = row.label;
-			  }
+			if (row.nom_colonne && row.nom_complet) {
+			  labelDict[row.nom_colonne] = row.nom_complet;
+			}
 			});
 			resolve();
 		  },
