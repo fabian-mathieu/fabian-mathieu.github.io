@@ -113,11 +113,24 @@
       <button id="toggle-normalized" class="data-toggle">Données normalisées</button>
     </div>
 
+	<div style="margin: 20px 2%;">
+	  <label for="theme-select">Thématique :</label>
+	  <select id="theme-select">
+		<option value="">-- Choisir une thématique --</option>
+	  </select>
+
+	  <label for="indicator-select" style="margin-left: 20px;">Indicateur :</label>
+	  <select id="indicator-select" disabled>
+		<option value="">-- Sélectionner un indicateur --</option>
+	  </select>
+	</div>
+
     <div id="mymap" style="height: 600px;"></div>
 
     <script>
-	<!-- Script pour récupérer les données du .csv -->
+	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
+	let themeToIndicators = {};
 
 	function loadLabels() {
 	  return new Promise((resolve, reject) => {
@@ -126,10 +139,23 @@
 		  header: true,
 		  complete: function(results) {
 			results.data.forEach(row => {
-			if (row.nom_colonne && row.nom_complet) {
-			  labelDict[row.nom_colonne] = row.nom_complet;
-			}
+			  const col = row.nom_colonne?.trim();
+			  const label = row.nom_complet?.trim();
+			  const themes = row.types_sources?.split(";").map(t => t.trim());
+
+			  if (col && label) {
+				labelDict[col] = label;
+
+				themes?.forEach(theme => {
+				  if (!themeToIndicators[theme]) {
+					themeToIndicators[theme] = [];
+				  }
+				  themeToIndicators[theme].push({ col, label });
+				});
+			  }
 			});
+
+			populateThemeSelect(); // Init menu une fois chargé
 			resolve();
 		  },
 		  error: reject
@@ -137,8 +163,40 @@
 	  });
 	}
 	
-	<!-- Script pour l'affichage des moyennes -->
-	      // Fonction pour calculer et afficher les moyennes
+	function populateThemeSelect() {
+	  const themeSelect = document.getElementById("theme-select");
+	  Object.keys(themeToIndicators).sort().forEach(theme => {
+		const option = document.createElement("option");
+		option.value = theme;
+		option.textContent = theme;
+		themeSelect.appendChild(option);
+	  });
+	}
+
+	function populateIndicatorSelect(theme) {
+	  const indicatorSelect = document.getElementById("indicator-select");
+	  indicatorSelect.innerHTML = `<option value="">-- Sélectionner un indicateur --</option>`;
+
+	  if (!theme || !themeToIndicators[theme]) {
+		indicatorSelect.disabled = true;
+		return;
+	  }
+
+	  themeToIndicators[theme]
+		.sort((a, b) => a.label.localeCompare(b.label))
+		.forEach(({ col, label }) => {
+		  const option = document.createElement("option");
+		  option.value = col;
+		  option.textContent = label;
+		  indicatorSelect.appendChild(option);
+		});
+
+	  indicatorSelect.disabled = false;
+	}
+
+	
+	  <!-- Script pour l'affichage des moyennes -->
+	  // Fonction pour calculer et afficher les moyennes
       function updateIndicateursComposites(data) {
         const indicators = {
           marche: { sum: 0, count: 0 },
@@ -217,6 +275,9 @@
 			epci.addTo(mymap);
 			rawData.addTo(mymap);
 			mymap.fitBounds(rawData.getBounds());
+		  });
+		  document.getElementById("theme-select").addEventListener("change", (e) => {
+			populateIndicatorSelect(e.target.value);
 		  });
 		});
 
