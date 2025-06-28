@@ -31,7 +31,7 @@ part_routes_tram,Part des routes réservées aux tram,Tram
 part_batie_autour_arrets_tram,Part de surface bâtie autour des arrêts de tram,Tram
 marche_tram_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (tram),Tram
 marche_tram_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (tram),Tram
-part_normalise_couverte_autopartage,Part de surface présente à moins de 400 mètres d'une station d'autopartage,aAutopartage
+part_normalise_couverte_autopartage,Part de surface présente à moins de 400 mètres d'une station d'autopartage,Autopartage
 autopartage_cout_rapport_revenu,Coût horaire d'utilisation d'un véhicule en autopartage rapporté au revenu médian de la population (2021),Autopartage
 part_routes_accessibles_vl,Part des routes accessibles aux véhicules,Autopartage
 part_surface_geofencing_citiz,Part de surface couverte par des zones de dépose-libre Citiz,Autopartage

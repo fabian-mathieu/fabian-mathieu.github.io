@@ -128,6 +128,66 @@
     <div id="mymap" style="height: 600px;"></div>
 
     <script>
+	let selectedIndicator = null; // Indicateur sélectionné
+	
+	// Affichage du gradient pour les données brutes
+	function getBlueGradient(value, min, max) {
+	  if (value === -1 || value === null || value === undefined || isNaN(value)) {
+		return '#CCCCCC'; // données manquantes
+	  }
+
+	  const ratio = (value - min) / (max - min);
+	  const r = Math.round(230 - 130 * ratio); // de 230 à 100
+	  const g = Math.round(240 - 160 * ratio); // de 240 à 80
+	  const b = Math.round(255);              // fixe (bleu pur)
+
+	  return `rgb(${r},${g},${b})`;
+	}
+	
+	function getDynamicStyle(feature) {
+	  const props = feature.properties;
+
+	  if (!selectedIndicator || !(selectedIndicator in props)) {
+		return getBaseStyle(); // fallback
+	  }
+
+	  const value = props[selectedIndicator];
+
+	  // Si données normalisées : du rouge au vert
+	  if (currentData === 'normalized') {
+		if (value === -1 || value == null) return getMissingDataStyle();
+
+		const r = Math.round((1 - value) * 255);
+		const g = Math.round(value * 255);
+		return {
+		  ...getBaseStyle(),
+		  fillColor: `rgb(${r},${g},0)`
+		};
+	  }
+
+	  // Si données brutes : calcul min/max à partir du layer
+	  const allFeatures = rawGeojson ? rawGeojson.getLayers().map(l => l.feature) : [];
+	  const validValues = allFeatures.map(f => f.properties[selectedIndicator]).filter(v => v !== -1 && v != null && !isNaN(v));
+
+	  const min = Math.min(...validValues);
+	  const max = Math.max(...validValues);
+
+	  return {
+		...getBaseStyle(),
+		fillColor: getBlueGradient(value, min, max)
+	  };
+	}
+
+	function recolorMap() {
+	  if (currentData === 'raw' && rawGeojson) {
+		rawGeojson.eachLayer(layer => {
+		  const style = getDynamicStyle(layer.feature);
+		  layer.setStyle(style);
+		});
+	  }
+	}
+
+
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
 	let themeToIndicators = {};
@@ -444,20 +504,21 @@
       }
 
       // Chargement des données brutes
-      function loadRawData() {
-        return fetch('data/maille_200m_avec_donnees.geojson')
-          .then(response => response.json())
-          .then(data => {
-            if (rawGeojson) {
-              mymap.removeLayer(rawGeojson);
-            }
-            rawGeojson = L.geoJson(data, {
-              style: getBaseStyle,
-              onEachFeature: onEachFeature
-            });
-            return rawGeojson;
-          });
-      }
+	function loadRawData() {
+	  return fetch('data/maille_200m_avec_donnees.geojson')
+		.then(response => response.json())
+		.then(data => {
+		  if (rawGeojson) {
+			mymap.removeLayer(rawGeojson);
+		  }
+		  rawGeojson = L.geoJson(data, {
+			style: getDynamicStyle,
+			onEachFeature: onEachFeature
+		  });
+		  return rawGeojson;
+		});
+	}
+
 
       // Chargement des données normalisées
       function loadNormalizedData() {
