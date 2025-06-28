@@ -37,7 +37,7 @@
 
   <main>
   
-    <h1>Visualisation des indicateurs de mobilité</h1>
+    <h1>Indicateurs de mobilité à l'échelle de l'EMS</h1>
 	
 	<!-- Section pour les indicateurs composites -->
     <div class="indicateurs-container" style="margin: 20px 2%; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
@@ -209,16 +209,19 @@
           });
       }
 		// Chargement des noms corrects des indicateurs
-		loadLabels().then(() => {
-		  Promise.all([
-			loadEpciLayer(),
-			loadRawData()
-		  ]).then(([epci, rawData]) => {
-			epci.addTo(mymap);
-			rawData.addTo(mymap);
-			mymap.fitBounds(rawData.getBounds());
-		  });
+		Promise.all([
+		  loadEpciLayer(),
+		  loadNormalizedData()
+		]).then(([epci, normalizedData]) => {
+		  currentData = 'normalized';
+		  document.getElementById('toggle-normalized').classList.add('active');
+		  document.getElementById('toggle-raw').classList.remove('active');
+
+		  epci.addTo(mymap);
+		  normalizedData.addTo(mymap);
+		  mymap.fitBounds(normalizedData.getBounds());
 		});
+
 
 
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
