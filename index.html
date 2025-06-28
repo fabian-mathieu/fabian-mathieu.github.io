@@ -154,16 +154,19 @@
 	  const value = props[selectedIndicator];
 
 	  // Si données normalisées : du rouge au vert
-	  if (currentData === 'normalized') {
-		if (value === -1 || value == null) return getMissingDataStyle();
+		if (currentData === 'normalized') {
+		  if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
 
-		const r = Math.round((1 - value) * 255);
-		const g = Math.round(value * 255);
-		return {
-		  ...getBaseStyle(),
-		  fillColor: `rgb(${r},${g},0)`
-		};
-	  }
+		  const r = Math.round(255 * (1 - value)); // 1 → rouge = 0
+		  const g = Math.round(255 * value);       // 1 → vert = 255
+		  const b = 0;
+
+		  return {
+			...getBaseStyle(),
+			fillColor: `rgb(${r},${g},${b})`
+		  };
+		}
+
 
 	  // Si données brutes : calcul min/max à partir du layer
 	  const allFeatures = rawGeojson ? rawGeojson.getLayers().map(l => l.feature) : [];
@@ -561,20 +564,25 @@
 
 
       // Chargement des données normalisées
-      function loadNormalizedData() {
-        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
-          .then(response => response.json())
-          .then(data => {
-            if (normalizedGeojson) {
-              mymap.removeLayer(normalizedGeojson);
-            }
-            normalizedGeojson = L.geoJson(data, {
-              style: getBaseStyle,
-              onEachFeature: onEachFeature
-            });
-            return normalizedGeojson;
-          });
-      }
+	function loadNormalizedData() {
+	  return fetch('data/maille_200m_avec_donnees_normalise.geojson')
+		.then(response => response.json())
+		.then(data => {
+		  if (normalizedGeojson) {
+			mymap.removeLayer(normalizedGeojson);
+		  }
+		  normalizedGeojson = L.geoJson(data, {
+			style: getDynamicStyle, // utilise le style dynamique
+			onEachFeature: onEachFeature
+		  });
+
+		  // Mise à jour des indicateurs composites
+		  updateIndicateursComposites(data);
+
+		  return normalizedGeojson;
+		});
+}
+
 
       // Basculer entre les données brutes et normalisées
       function toggleData(type) {
