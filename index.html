@@ -209,19 +209,16 @@
           });
       }
 		// Chargement des noms corrects des indicateurs
-		Promise.all([
-		  loadEpciLayer(),
-		  loadNormalizedData()
-		]).then(([epci, normalizedData]) => {
-		  currentData = 'normalized';
-		  document.getElementById('toggle-normalized').classList.add('active');
-		  document.getElementById('toggle-raw').classList.remove('active');
-
-		  epci.addTo(mymap);
-		  normalizedData.addTo(mymap);
-		  mymap.fitBounds(normalizedData.getBounds());
+		loadLabels().then(() => {
+		  Promise.all([
+			loadEpciLayer(),
+			loadRawData()
+		  ]).then(([epci, rawData]) => {
+			epci.addTo(mymap);
+			rawData.addTo(mymap);
+			mymap.fitBounds(rawData.getBounds());
+		  });
 		});
-
 
 
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
@@ -453,18 +450,23 @@
       document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
       document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
 
-      // Chargement initial
-      Promise.all([
-        loadEpciLayer(),
-        loadRawData()
-      ]).then(([epci, rawData]) => {
-        // Ajouter les couches à la carte
-        epci.addTo(mymap);
-        rawData.addTo(mymap);
-        
-        // Ajuster la vue pour afficher toutes les données
-        mymap.fitBounds(rawData.getBounds());
-      });
+		// Chargement initial
+		Promise.all([
+		  loadEpciLayer(),
+		  loadRawData()
+		]).then(([epci, rawData]) => {
+		  epci.addTo(mymap);
+		  rawData.addTo(mymap);
+		  mymap.fitBounds(rawData.getBounds());
+
+		  // Chargement immédiat des données normalisées pour calculer les moyennes
+		  fetch('data/maille_200m_avec_donnees_normalise.geojson')
+			.then(response => response.json())
+			.then(normalizedData => {
+			  updateIndicateursComposites(normalizedData);
+			});
+		});
+
     </script>
   </main>
 </body>
