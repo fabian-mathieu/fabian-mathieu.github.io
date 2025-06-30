@@ -275,55 +275,48 @@
 	
 	  <!-- Script pour l'affichage des moyennes -->
 	  // Fonction pour calculer et afficher les moyennes
-      function updateIndicateursComposites(data) {
-        const indicators = {
-          marche: { sum: 0, count: 0 },
-          velos: { sum: 0, count: 0 },
-          bus: { sum: 0, count: 0 },
-          tram: { sum: 0, count: 0 },
-          vl: { sum: 0, count: 0 },
-          autopartage: { sum: 0, count: 0 }
-        };
+		function updateIndicateursComposites(data) {
+		  const indicators = {
+			marche: { sum: 0, count: 0 },
+			velos: { sum: 0, count: 0 },
+			bus: { sum: 0, count: 0 },
+			tram: { sum: 0, count: 0 },
+			vl: { sum: 0, count: 0 },
+			autopartage: { sum: 0, count: 0 }
+		  };
 
-        // Calcul des sommes
-        data.features.forEach(feature => {
-          const props = feature.properties;
-          if (props.ind_compose_marche !== -1) {
-            indicators.marche.sum += props.ind_compose_marche;
-            indicators.marche.count++;
-          }
-          if (props.ind_compose_velos !== -1) {
-            indicators.velos.sum += props.ind_compose_velos;
-            indicators.velos.count++;
-          }
-          if (props.ind_compose_bus !== -1) {
-            indicators.bus.sum += props.ind_compose_bus;
-            indicators.bus.count++;
-          }
-          if (props.ind_compose_tram !== -1) {
-            indicators.tram.sum += props.ind_compose_tram;
-            indicators.tram.count++;
-          }
-          if (props.ind_compose_vl !== -1) {
-            indicators.vl.sum += props.ind_compose_vl;
-            indicators.vl.count++;
-          }
-          if (props.ind_compose_autopartage !== -1) {
-            indicators.autopartage.sum += props.ind_compose_autopartage;
-            indicators.autopartage.count++;
-          }
-        });
+		  const prefix = (currentData === 'normalized') ? 'norm__' : '';
 
-        // Calcul et affichage des moyennes
-        for (const [key, value] of Object.entries(indicators)) {
-          const avg = value.count > 0 ? (value.sum / value.count) : 0;
-          const percent = (avg * 100).toFixed(0);
-          const formattedValue = avg.toFixed(2);
-          
-          document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
-          document.getElementById(`${key}-value`).textContent = formattedValue;
-        }
-      }
+		  data.features.forEach(feature => {
+			const props = feature.properties;
+
+			const keys = {
+			  marche: `${prefix}ind_compose_marche`,
+			  velos: `${prefix}ind_compose_velos`,
+			  bus: `${prefix}ind_compose_bus`,
+			  tram: `${prefix}ind_compose_tram`,
+			  vl: `${prefix}ind_compose_vl`,
+			  autopartage: `${prefix}ind_compose_autopartage`
+			};
+
+			for (const [key, dataKey] of Object.entries(keys)) {
+			  const val = props[dataKey];
+			  if (val !== -1 && val != null && !isNaN(val)) {
+				indicators[key].sum += val;
+				indicators[key].count++;
+			  }
+			}
+		  });
+
+		  for (const [key, value] of Object.entries(indicators)) {
+			const avg = value.count > 0 ? (value.sum / value.count) : 0;
+			const percent = (avg * 100).toFixed(0);
+			const formattedValue = avg.toFixed(2);
+			document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
+			document.getElementById(`${key}-value`).textContent = formattedValue;
+		  }
+		}
+
 
 		// Chargement des noms corrects des indicateurs
 		loadLabels().then(() => {
