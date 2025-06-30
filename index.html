@@ -573,6 +573,7 @@
 			rawGeojson.addTo(mymap);
 			mymap.fitBounds(rawGeojson.getBounds());
 			updateIndicateursComposites({ features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
+		}
 		else {
             if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
             rawGeojson.addTo(mymap);
