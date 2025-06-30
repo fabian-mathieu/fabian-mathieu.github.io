@@ -20,3 +20,4 @@ button:hover{background-color:#05050524;}
 .data-toggle {margin: 10px; padding: 8px 15px; color: black; border: none; border-radius: 4px;cursor: pointer;}
 .data-toggle.active {background: #448aff; color:white;}
 .leaflet-control.legend{font-size: 0.9em; line-height: 1.4em;}
+.progress-bar{height: 1.1em; background: #e0e0e0; margin-top: 5px}
