@@ -40,7 +40,7 @@
         <div style="flex-grow: 1;">
           <div>Marche</div>
           <div class="progress-bar" id="marche-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="marche-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -51,7 +51,7 @@
         <div style="flex-grow: 1;">
           <div>Vélos</div>
           <div class="progress-bar" id="velos-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="velos-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -62,7 +62,7 @@
         <div style="flex-grow: 1;">
           <div>Bus</div>
           <div class="progress-bar" id="bus-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="bus-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -73,7 +73,7 @@
         <div style="flex-grow: 1;">
           <div>Tram</div>
           <div class="progress-bar" id="tram-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="tram-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -84,7 +84,7 @@
         <div style="flex-grow: 1;">
           <div>Véhicules légers</div>
           <div class="progress-bar" id="vl-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="vl-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -95,7 +95,7 @@
         <div style="flex-grow: 1;">
           <div>Autopartage</div>
           <div class="progress-bar" id="autopartage-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
           </div>
           <div id="autopartage-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -255,7 +255,7 @@
 
 	function populateIndicatorSelect(theme) {
 	  const indicatorSelect = document.getElementById("indicator-select");
-	  indicatorSelect.innerHTML = `<option value="">-- Sélectionner un indicateur --</option>`;
+	  indicatorSelect.innerHTML = `<option value="">Choisir un indicateur</option>`;
 
 	  if (!theme || !themeToIndicators[theme]) {
 		indicatorSelect.disabled = true;
@@ -540,44 +540,6 @@
           });
       }
 
-      // Chargement des données brutes
-	function loadRawData() {
-	  return fetch('data/maille_200m_avec_donnees.geojson')
-		.then(response => response.json())
-		.then(data => {
-		  if (rawGeojson) {
-			mymap.removeLayer(rawGeojson);
-		  }
-		  rawGeojson = L.geoJson(data, {
-			style: getDynamicStyle,
-			onEachFeature: onEachFeature
-		  });
-		  return rawGeojson;
-		});
-	}
-
-
-      // Chargement des données normalisées
-	function loadNormalizedData() {
-	  return fetch('data/maille_200m_avec_donnees_normalise.geojson')
-		.then(response => response.json())
-		.then(data => {
-		  if (normalizedGeojson) {
-			mymap.removeLayer(normalizedGeojson);
-		  }
-		  normalizedGeojson = L.geoJson(data, {
-			style: getDynamicStyle, // utilise le style dynamique
-			onEachFeature: onEachFeature
-		  });
-
-		  // Mise à jour des indicateurs composites
-		  updateIndicateursComposites(data);
-
-		  return normalizedGeojson;
-		});
-}
-
-
       // Basculer entre les données brutes et normalisées
       function toggleData(type) {
         currentData = type;
@@ -671,8 +633,6 @@
 		};
 
 		legend.addTo(mymap);
-
-
 
     </script>
   </main>
