@@ -137,43 +137,31 @@
 
 	  return `rgb(${r},${g},${b})`;
 	}
-	
 	function getDynamicStyle(feature) {
 	  const props = feature.properties;
 
-	  if (!selectedIndicator || !(selectedIndicator in props)) {
-		return getBaseStyle(); // fallback
+	  if (!selectedIndicator) return getBaseStyle();
+
+	  let value;
+	  if (currentData === 'normalized') {
+		value = props[`norm__${selectedIndicator}`];
+		if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
+
+		const r = Math.round(255 * (1 - value));
+		const g = Math.round(255 * value);
+		return { ...getBaseStyle(), fillColor: `rgb(${r},${g},0)` };
 	  }
 
-	  const value = props[selectedIndicator];
-
-	  // Si données normalisées : du rouge au vert
-		if (currentData === 'normalized') {
-		  if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
-
-		  const r = Math.round(255 * (1 - value)); // 1 → rouge = 0
-		  const g = Math.round(255 * value);       // 1 → vert = 255
-		  const b = 0;
-
-		  return {
-			...getBaseStyle(),
-			fillColor: `rgb(${r},${g},${b})`
-		  };
-		}
-
-
-	  // Si données brutes : calcul min/max à partir du layer
-	  const allFeatures = rawGeojson ? rawGeojson.getLayers().map(l => l.feature) : [];
-	  const validValues = allFeatures.map(f => f.properties[selectedIndicator]).filter(v => v !== -1 && v != null && !isNaN(v));
-
+	  value = props[selectedIndicator];
+	  const allFeatures = rawGeojson?.getLayers().map(l => l.feature) || [];
+	  const validValues = allFeatures.map(f => f.properties[selectedIndicator])
+		.filter(v => v !== -1 && v != null && !isNaN(v));
 	  const min = Math.min(...validValues);
 	  const max = Math.max(...validValues);
 
-	  return {
-		...getBaseStyle(),
-		fillColor: getBlueGradient(value, min, max)
-	  };
+	  return { ...getBaseStyle(), fillColor: getBlueGradient(value, min, max) };
 	}
+
 
 	function recolorMap() {
 	  if (!selectedIndicator) {
@@ -202,9 +190,16 @@
 		  layer.setStyle(style);
 		});
 
-		legend.update(selectedIndicator, 0, 1, true);
+		legend.update(selectedIndicator, 0, 1, true); // 👈 valeurs fixes 0 à 1
 	  }
+
+	  // Mettre à jour les indicateurs composites
+	  const activeGeojson = currentData === 'normalized' ? normalizedGeojson : rawGeojson;
+	  updateIndicateursComposites({
+		features: activeGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+	  });
 	}
+
 
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
@@ -354,8 +349,12 @@
 
 				rawGeojson.addTo(mymap);
 				mymap.fitBounds(rawGeojson.getBounds());
+				
+				updateIndicateursComposites({
+				  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+				});
 
-				updateIndicateursComposites({ features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
+				// updateIndicateursComposites({ features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
 
 				toggleData('raw');
 			  });
