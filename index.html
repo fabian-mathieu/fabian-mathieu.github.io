@@ -518,6 +518,19 @@
             return epciLayer;
           });
       }
+	  
+	Papa.parse("data/donnees_normalise.csv", {
+		download: true,
+		header: true,
+		dynamicTyping: true,
+		complete: function(results) {
+			const fakeGeojson = {
+				features: results.data.map(row => ({ properties: row }))
+			};
+			updateIndicateursComposites(fakeGeojson);
+		  }
+	});
+
 
       // Basculer entre les données brutes et normalisées
       function toggleData(type) {
