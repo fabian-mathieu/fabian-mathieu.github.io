@@ -206,8 +206,6 @@
 	  }
 	}
 
-
-
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
 	let themeToIndicators = {};
@@ -327,25 +325,6 @@
         }
       }
 
-      // Chargement des données normalisées
-      function loadNormalizedData() {
-        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
-          .then(response => response.json())
-          .then(data => {
-            if (normalizedGeojson) {
-              mymap.removeLayer(normalizedGeojson);
-            }
-            normalizedGeojson = L.geoJson(data, {
-              style: getBaseStyle,
-              onEachFeature: onEachFeature
-            });
-            
-            // Mise à jour des indicateurs composites
-            updateIndicateursComposites(data);
-            
-            return normalizedGeojson;
-          });
-      }
 		// Chargement des noms corrects des indicateurs
 		loadLabels().then(() => {
 		  Promise.all([
@@ -572,28 +551,85 @@
           }
         }
       }
-
-      // Écouteurs d'événements pour les boutons
-      document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
-      document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
-
-		// Chargement initial
-		Promise.all([
-		  loadEpciLayer(),
-		  loadRawData()
-		]).then(([epci, rawData]) => {
-		  epci.addTo(mymap);
-		  rawData.addTo(mymap);
-		  mymap.fitBounds(rawData.getBounds());
-
-		  // Chargement immédiat des données normalisées pour calculer les moyennes
-		  fetch('data/maille_200m_avec_donnees_normalise.geojson')
-			.then(response => response.json())
-			.then(normalizedData => {
-			  updateIndicateursComposites(normalizedData);
-			});
-		});
+	  
+	let baseGeojson;
+	let rawData = {}, normalizedData = {};
 		
+	function fetchCsvData(path) {
+	  return new Promise((resolve, reject) => {
+		Papa.parse(path, {
+		  download: true,
+		  header: true,
+		  dynamicTyping: true,
+		  complete: (results) => {
+			const dict = {};
+			results.data.forEach(row => {
+			  if (row.idINSPIRE) {
+				dict[row.idINSPIRE] = row;
+			  }
+			});
+			resolve(dict);
+		  },
+		  error: reject
+		});
+	  });
+	}
+
+	function enrichGeojsonWithData(layerGroup, dataDict, type) {
+	  layerGroup.eachLayer(layer => {
+		const id = layer.feature.properties.idINSPIRE;
+		const data = dataDict[id];
+		if (data) {
+		  for (const [key, value] of Object.entries(data)) {
+			if (type === 'raw') {
+			  layer.feature.properties[key] = value;
+			} else if (type === 'normalized') {
+			  layer.feature.properties[`norm__${key}`] = value;
+			}
+		  }
+		}
+	  });
+	}
+
+
+	// Écouteurs d'événements pour les boutons
+	document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
+	document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
+
+	// Chargement initial de l’EPCI et des données géographiques de base
+	Promise.all([
+	  loadEpciLayer(),
+	  fetch('data/maille_200m.geojson').then(res => res.json())
+	]).then(([epci, geojsonData]) => {
+	  epci.addTo(mymap);
+
+	  baseGeojson = L.geoJson(geojsonData, {
+		style: getBaseStyle,
+		onEachFeature: onEachFeature
+	  }).addTo(mymap);
+
+	  mymap.fitBounds(baseGeojson.getBounds());
+
+	  // Chargement des données CSV
+	  Promise.all([
+		fetchCsvData('data/donnees_brutes.csv'),
+		fetchCsvData('data/donnees_normalise.csv')
+	  ]).then(([brutes, normalisees]) => {
+		rawData = brutes;
+		normalizedData = normalisees;
+
+		// Ajout des propriétés à baseGeojson
+		enrichGeojsonWithData(baseGeojson, rawData, 'raw');
+		enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
+
+		// Calcul des moyennes initiales
+		updateIndicateursComposites({ features: baseGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
+
+		// Forcer l'affichage initial des données brutes
+		toggleData('raw');
+	  });
+	});
+
 		// Légende dynamique (ajoutée à droite)
 		var legend = L.control({ position: 'bottomright' });
 
