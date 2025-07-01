@@ -301,33 +301,38 @@
 		});
 	  }
 
-  function updateSourcesForIndicator(indicatorKey) {
-    const container = document.getElementById("source-info");
-    const list = document.getElementById("source-list");
-    list.innerHTML = "";
+	function updateSourcesForIndicator(indicatorKey) {
+	  const container = document.getElementById("source-info");
+	  const list = document.getElementById("source-list");
+	  list.innerHTML = "";
 
-    if (!indicatorKey || !sourceDict[indicatorKey]) {
-      container.style.display = "none";
-      return;
-    }
+	  if (!indicatorKey || !sourceDict[indicatorKey]) {
+		container.style.display = "none";
+		return;
+	  }
 
-    const sources = sourceDict[indicatorKey];
-    sources.forEach(src => {
-      const meta = sourceMetaDict[src];
-      const li = document.createElement("li");
-      if (meta) {
-        li.innerHTML = `
-          <strong>${src}</strong> —
-          ${meta.description || 'Pas de description'}
-          <br><em>Dern. mise à jour :</em> ${meta.derniere_maj || 'inconnue'}
-          ${meta.url ? `<br><a href="${meta.url}" target="_blank">En savoir plus</a>` : ''}`;
-      } else {
-        li.textContent = src;
-      }
-      list.appendChild(li);
-    });
-    container.style.display = "block";
-  }
+	  const sources = sourceDict[indicatorKey];
+	  sources.forEach(src => {
+		const meta = sourceMetaDict[src];
+
+		const li = document.createElement("li");
+		li.style.marginBottom = "0.8em"; // éviter empilements visuels
+
+		if (meta) {
+		  li.innerHTML = `
+			<strong>${src}</strong> — ${meta.description || 'Pas de description'}<br>
+			<em>Dern. mise à jour :</em> ${meta.derniere_maj || 'inconnue'}<br>
+			${meta.url ? `<a href="${meta.url}" target="_blank">En savoir plus</a>` : ''}`;
+		} else {
+		  li.textContent = src;
+		}
+
+		list.appendChild(li);
+	  });
+
+	  container.style.display = "block";
+	}
+
 
   // Charger les sources AVANT de gérer les changements d'indicateur
 	Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
