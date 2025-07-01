@@ -22,7 +22,7 @@ ratio_arrets_autopartage_bus,Part des arrêts de bus disposant d'une station d'a
 part_routes_bus,Part des routes réservées aux bus,Bus,lignes_bus;bd_topo
 part_batie_autour_arrets_bus,Part de surface bâtie autour des arrêts de bus,Bus,bd_topo;gtfs_ems
 marche_bus_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (bus),Bus,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
-marche_bus_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (bus),Busbd_topo;Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+marche_bus_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (bus),Bus,bd_topo;Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
 att_moy_semaine_tram,Temps d'attente moyen hebdomadaire pour un tram,Tram,gtfs_ems
 cout_horaire_tram,Coût horaire des tram(€ / h),Tram,gtfs_ems
 ratio_arrets_pr_tram,Part des arrêts de tram disposant d'un parking relais à moins de 400 mètres,Tram,bd_topo;gtfs_ems
