@@ -365,6 +365,8 @@
 				style: getBaseStyle,
 				onEachFeature: onEachFeature
 			  });
+			  
+		calculerMoyennesIndicateursCompositesDepuisCSV("data/donnees_normalise.csv");
 
 			  // Ajoute au chargement, mais seulement après enrichissement
 			  Promise.all([
@@ -619,6 +621,56 @@
 	  
 	let baseGeojson;
 	let rawData = {}, normalizedData = {};
+	
+		function calculerMoyennesIndicateursCompositesDepuisCSV(path) {
+		  const champs = [
+			'ind_compose_marche',
+			'ind_compose_velos',
+			'ind_compose_bus',
+			'ind_compose_tram',
+			'ind_compose_vl',
+			'ind_compose_autopartage'
+		  ];
+
+		  const stats = {
+			ind_compose_marche: { sum: 0, count: 0 },
+			ind_compose_velos: { sum: 0, count: 0 },
+			ind_compose_bus: { sum: 0, count: 0 },
+			ind_compose_tram: { sum: 0, count: 0 },
+			ind_compose_vl: { sum: 0, count: 0 },
+			ind_compose_autopartage: { sum: 0, count: 0 }
+		  };
+
+		  Papa.parse(path, {
+			download: true,
+			header: true,
+			dynamicTyping: true,
+			complete: function(results) {
+			  results.data.forEach(row => {
+				champs.forEach(champ => {
+				  const val = row[champ];
+				  if (val !== -1 && val != null && !isNaN(val)) {
+					stats[champ].sum += val;
+					stats[champ].count += 1;
+				  }
+				});
+			  });
+
+			  // Affichage dans les barres de progression
+			  champs.forEach(champ => {
+				const key = champ.replace('ind_compose_', ''); // ex: "marche"
+				const total = stats[champ];
+				const avg = total.count > 0 ? total.sum / total.count : 0;
+				const percent = (avg * 100).toFixed(0);
+				const formatted = avg.toFixed(2);
+
+				document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
+				document.getElementById(`${key}-value`).textContent = formatted;
+			  });
+			}
+		  });
+		}
+
 		
 	function fetchCsvData(path) {
 	  return new Promise((resolve, reject) => {
