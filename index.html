@@ -236,8 +236,6 @@
 	  }
 	}
 
-
-
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
 	let themeToIndicators = {};
@@ -245,25 +243,39 @@
 	let sourceMetaDict = {}; // contient les métadonnées du fichier tableau_sources_donnees.csv
 
 	  // Charger les sources à partir des deux CSV
-	  function loadLabels() {
-		return new Promise((resolve, reject) => {
-		  Papa.parse("data/labels.csv", {
-			download: true,
-			header: true,
-			complete: function(results) {
-			  results.data.forEach(row => {
-				const col = row.nom_colonne?.trim();
-				const sources = row.nom_source?.split(';').map(s => s.trim()).filter(Boolean) || [];
-				if (col) {
-				  sourceDict[col] = sources;
-				}
-			  });
-			  resolve();
-			},
-			error: reject
-		  });
+	function loadLabels() {
+	  return new Promise((resolve, reject) => {
+		Papa.parse("data/labels.csv", {
+		  download: true,
+		  header: true,
+		  complete: function(results) {
+			results.data.forEach(row => {
+			  const col = row.nom_colonne?.trim();
+			  const label = row.nom_complet?.trim();
+			  const themes = row.types_sources?.split(";").map(t => t.trim());
+			  const sources = row.nom_source?.split(";").map(s => s.trim()).filter(Boolean) || [];
+
+			  if (col && label) {
+				labelDict[col] = label;
+				sourceDict[col] = sources;
+
+				themes?.forEach(theme => {
+				  if (!themeToIndicators[theme]) {
+					themeToIndicators[theme] = [];
+				  }
+				  themeToIndicators[theme].push({ col, label });
+				});
+			  }
+			});
+
+			populateThemeSelect();
+			resolve();
+		  },
+		  error: reject
 		});
-	  }
+	  });
+	}
+
 
 	  function loadSourceMetadata() {
 		return new Promise((resolve, reject) => {
