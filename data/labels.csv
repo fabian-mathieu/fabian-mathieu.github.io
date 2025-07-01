@@ -51,6 +51,6 @@ part_marche,Part de navetteurs utilisant principalement la marche,Schémas de mo
 part_velos,Part de navetteurs utilisant principalement le vélos,Schémas de mobilité
 part_communs,Part de navetteurs utilisant principalement les transports en communs,Schémas de mobilité
 part_vl,Part de navetteurs utilisant principalement les véhicules légers,Schémas de mobilité
-part_surface_bruit_53_db, Part de surface où le bruit routier moyen journalier est une nuisance (53 dB ou +), Mobilité durable
-part_surfface_transport, Part d'occupation du sol par les infrastructures de transport, Mobilité durable
+part_surface_bruit_53db, Part de surface où le bruit routier moyen journalier est une nuisance (53 dB ou +), Mobilité durable
+part_surface_transport, Part d'occupation du sol par les infrastructures de transport, Mobilité durable
 nb_accidents_circulation, Nombre d'accidents liés aux transports, Mobilité durable

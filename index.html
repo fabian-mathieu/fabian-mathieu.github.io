@@ -124,6 +124,52 @@
     <script>
 	let selectedIndicator = null; // Indicateur sélectionné
 	
+		// Chargement initial de l’EPCI et des données géographiques de base
+		Promise.all([
+		  loadEpciLayer(),
+		  fetch('data/maille_200m.geojson').then(res => res.json())
+		]).then(([epci, geojsonData]) => {
+		  epci.addTo(mymap);
+
+		  baseGeojson = L.geoJson(geojsonData, {
+			style: getBaseStyle,
+			onEachFeature: onEachFeature
+		  }).addTo(mymap);
+
+		  mymap.fitBounds(baseGeojson.getBounds());
+
+		  // Chargement des données CSV
+		  Promise.all([
+			fetchCsvData('data/donnees_brutes.csv'),
+			fetchCsvData('data/donnees_normalise.csv')
+		  ]).then(([brutes, normalisees]) => {
+			rawData = brutes;
+			normalizedData = normalisees;
+
+			enrichGeojsonWithData(baseGeojson, rawData, 'raw');
+			enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
+
+			rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+			  style: getDynamicStyle,
+			  onEachFeature: onEachFeature
+			});
+			normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+			  style: getDynamicStyle,
+			  onEachFeature: onEachFeature
+			});
+
+			rawGeojson.addTo(mymap);
+			mymap.fitBounds(rawGeojson.getBounds());
+
+			// Calcul UNE SEULE FOIS les moyennes sur les données brutes uniquement
+			updateIndicateursComposites({
+			  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+			});
+
+			toggleData('raw');
+		  });
+		});
+	
 	// Affichage du gradient pour les données brutes
 	function getBlueGradient(value, min, max) {
 	  if (value === -1 || value === null || value === undefined || isNaN(value)) {
@@ -637,51 +683,7 @@
 	document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
 	document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
 
-	// Chargement initial de l’EPCI et des données géographiques de base
-		Promise.all([
-		  loadEpciLayer(),
-		  fetch('data/maille_200m.geojson').then(res => res.json())
-		]).then(([epci, geojsonData]) => {
-		  epci.addTo(mymap);
 
-		  baseGeojson = L.geoJson(geojsonData, {
-			style: getBaseStyle,
-			onEachFeature: onEachFeature
-		  }).addTo(mymap);
-
-		  mymap.fitBounds(baseGeojson.getBounds());
-
-		  // Chargement des données CSV
-		  Promise.all([
-			fetchCsvData('data/donnees_brutes.csv'),
-			fetchCsvData('data/donnees_normalise.csv')
-		  ]).then(([brutes, normalisees]) => {
-			rawData = brutes;
-			normalizedData = normalisees;
-
-			enrichGeojsonWithData(baseGeojson, rawData, 'raw');
-			enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
-
-			rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-			  style: getDynamicStyle,
-			  onEachFeature: onEachFeature
-			});
-			normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-			  style: getDynamicStyle,
-			  onEachFeature: onEachFeature
-			});
-
-			rawGeojson.addTo(mymap);
-			mymap.fitBounds(rawGeojson.getBounds());
-
-			// Calcul UNE SEULE FOIS les moyennes sur les données brutes uniquement
-			updateIndicateursComposites({
-			  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
-			});
-
-			toggleData('raw');
-		  });
-		});
 
 		// Légende dynamique (ajoutée à droite)
 		var legend = L.control({ position: 'bottomright' });
