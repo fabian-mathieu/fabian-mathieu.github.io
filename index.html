@@ -330,13 +330,30 @@
   }
 
   // Charger les sources AVANT de gérer les changements d'indicateur
-  Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
-    document.getElementById("indicator-select").addEventListener("change", (e) => {
-      selectedIndicator = e.target.value || null;
-      recolorMap();
-      updateSourcesForIndicator(selectedIndicator);
-    });
-  });
+	Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
+	  // Événement changement d'indicateur
+	  document.getElementById("indicator-select").addEventListener("change", (e) => {
+		selectedIndicator = e.target.value || null;
+		recolorMap();
+		updateSourcesForIndicator(selectedIndicator);
+	  });
+
+	  // Événement changement de thème
+	  document.getElementById("theme-select").addEventListener("change", (e) => {
+		populateIndicatorSelect(e.target.value);
+	  });
+
+	  // Chargement des couches de carte
+	  Promise.all([
+		loadEpciLayer(),
+		loadRawData()
+	  ]).then(([epci, rawData]) => {
+		epci.addTo(mymap);
+		rawData.addTo(mymap);
+		mymap.fitBounds(rawData.getBounds());
+	  });
+	});
+
 	
 	function populateThemeSelect() {
 	  const themeSelect = document.getElementById("theme-select");
@@ -446,24 +463,6 @@
             return normalizedGeojson;
           });
       }
-		// Chargement des noms corrects des indicateurs
-		loadLabels().then(() => {
-		  Promise.all([
-			loadEpciLayer(),
-			loadRawData()
-		  ]).then(([epci, rawData]) => {
-			epci.addTo(mymap);
-			rawData.addTo(mymap);
-			mymap.fitBounds(rawData.getBounds());
-		  });
-		  document.getElementById("theme-select").addEventListener("change", (e) => {
-			populateIndicatorSelect(e.target.value);
-		  });
-		  document.getElementById("indicator-select").addEventListener("change", (e) => {
-			selectedIndicator = e.target.value || null;
-			recolorMap();
-		});
-		});
 
 
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
