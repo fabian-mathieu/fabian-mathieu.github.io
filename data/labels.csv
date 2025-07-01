@@ -46,8 +46,11 @@ bornes_ve_par_habitant,Nombre de borne de recharge pour véhicules électriques 
 vl_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (véhicules légers),Véhicules légers
 vl_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (véhicules légers),Véhicules légers
 HSMI_global,Indice de mixité logement / services, Diversité fonctionnelle
-HEMIIndice de mixité logement / emplois,Diversité fonctionnelle
+HEMI,Indice de mixité logement / emplois,Diversité fonctionnelle
 part_marche,Part de navetteurs utilisant principalement la marche,Schémas de mobilité
 part_velos,Part de navetteurs utilisant principalement le vélos,Schémas de mobilité
 part_communs,Part de navetteurs utilisant principalement les transports en communs,Schémas de mobilité
 part_vl,Part de navetteurs utilisant principalement les véhicules légers,Schémas de mobilité
+part_surface_bruit_53_db, Part de surface où le bruit routier moyen journalier est une nuisance (53 dB ou +), Mobilité durable
+part_surfface_transport, Part d'occupation du sol par les infrastructures de transport, Mobilité durable
+nb_accidents_circulation, Nombre d'accidents liés aux transports, Mobilité durable

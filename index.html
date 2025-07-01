@@ -349,14 +349,29 @@
 
 				rawGeojson.addTo(mymap);
 				mymap.fitBounds(rawGeojson.getBounds());
-				
+						
+				// Crée les deux couches GeoJSON enrichies
+				rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+				  style: getDynamicStyle,
+				  onEachFeature: onEachFeature
+				});
+				normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+				  style: getDynamicStyle,
+				  onEachFeature: onEachFeature
+				});
+
+				// Ajoute rawGeojson à la carte
+				rawGeojson.addTo(mymap);
+				mymap.fitBounds(rawGeojson.getBounds());
+
+				// Calcule les moyennes pour l'affichage initial
 				updateIndicateursComposites({
 				  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
 				});
 
-				// updateIndicateursComposites({ features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
-
+				// Active la vue "raw"
 				toggleData('raw');
+
 			  });
 			});
 
@@ -649,12 +664,10 @@
 		enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
 
 		// Calcul des moyennes initiales
-		// ✅ Appelle updateIndicateursComposites ici avec rawGeojson :
 		updateIndicateursComposites({
 		  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
 		});
 
-		// ✅ Appelle aussi toggleData ici pour forcer l’état visuel
 		toggleData('raw');
 	  });
 	});
