@@ -638,39 +638,50 @@
 	document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
 
 	// Chargement initial de l’EPCI et des données géographiques de base
-	Promise.all([
-	  loadEpciLayer(),
-	  fetch('data/maille_200m.geojson').then(res => res.json())
-	]).then(([epci, geojsonData]) => {
-	  epci.addTo(mymap);
+		Promise.all([
+		  loadEpciLayer(),
+		  fetch('data/maille_200m.geojson').then(res => res.json())
+		]).then(([epci, geojsonData]) => {
+		  epci.addTo(mymap);
 
-	  baseGeojson = L.geoJson(geojsonData, {
-		style: getBaseStyle,
-		onEachFeature: onEachFeature
-	  }).addTo(mymap);
+		  baseGeojson = L.geoJson(geojsonData, {
+			style: getBaseStyle,
+			onEachFeature: onEachFeature
+		  }).addTo(mymap);
 
-	  mymap.fitBounds(baseGeojson.getBounds());
+		  mymap.fitBounds(baseGeojson.getBounds());
 
-	  // Chargement des données CSV
-	  Promise.all([
-		fetchCsvData('data/donnees_brutes.csv'),
-		fetchCsvData('data/donnees_normalise.csv')
-	  ]).then(([brutes, normalisees]) => {
-		rawData = brutes;
-		normalizedData = normalisees;
+		  // Chargement des données CSV
+		  Promise.all([
+			fetchCsvData('data/donnees_brutes.csv'),
+			fetchCsvData('data/donnees_normalise.csv')
+		  ]).then(([brutes, normalisees]) => {
+			rawData = brutes;
+			normalizedData = normalisees;
 
-		// Ajout des propriétés à baseGeojson
-		enrichGeojsonWithData(baseGeojson, rawData, 'raw');
-		enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
+			enrichGeojsonWithData(baseGeojson, rawData, 'raw');
+			enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
 
-		// Calcul des moyennes initiales
-		updateIndicateursComposites({
-		  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+			rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+			  style: getDynamicStyle,
+			  onEachFeature: onEachFeature
+			});
+			normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
+			  style: getDynamicStyle,
+			  onEachFeature: onEachFeature
+			});
+
+			rawGeojson.addTo(mymap);
+			mymap.fitBounds(rawGeojson.getBounds());
+
+			// Calcul UNE SEULE FOIS les moyennes sur les données brutes uniquement
+			updateIndicateursComposites({
+			  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+			});
+
+			toggleData('raw');
+		  });
 		});
-
-		toggleData('raw');
-	  });
-	});
 
 		// Légende dynamique (ajoutée à droite)
 		var legend = L.control({ position: 'bottomright' });
