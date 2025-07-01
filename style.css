@@ -21,3 +21,5 @@ button:hover{background-color:#05050524;}
 .data-toggle.active {background: #448aff; color:white;}
 .leaflet-control.legend{font-size: 0.9em; line-height: 1.4em;}
 .progress-bar{height: 1.1em; background: #e0e0e0; margin-top: 5px}
+#source-list{display: grid;}
+#source-info a {float: none; padding: 0; font-size: 1em; line-height: 1.4em; border-radius: 0; color: #448aff; text-decoration: underline;}
