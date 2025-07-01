@@ -152,92 +152,6 @@
     <div id="mymap" style="height: 600px;"></div>
 
     <script>
-	<!-- Gère les sources des données -->
-	  let labelDict = {};
-	  let sourceDict = {};
-	  let sourceMetaDict = {}; // contient les métadonnées du fichier tableau_sources_donnees.csv
-
-	  // Charger les sources à partir des deux CSV
-	  function loadLabels() {
-		return new Promise((resolve, reject) => {
-		  Papa.parse("data/labels.csv", {
-			download: true,
-			header: true,
-			complete: function(results) {
-			  results.data.forEach(row => {
-				const col = row.nom_colonne?.trim();
-				const sources = row.nom_source?.split(';').map(s => s.trim()).filter(Boolean) || [];
-				if (col) {
-				  sourceDict[col] = sources;
-				}
-			  });
-			  resolve();
-			},
-			error: reject
-		  });
-		});
-	  }
-
-	  function loadSourceMetadata() {
-		return new Promise((resolve, reject) => {
-		  Papa.parse("data/tableau_sources_donnees.csv", {
-			download: true,
-			header: true,
-			delimiter: ";",
-			complete: function(results) {
-			  results.data.forEach(row => {
-				const nom = row.nom?.trim();
-				if (nom) {
-				  sourceMetaDict[nom] = {
-					description: row.description?.trim(),
-					derniere_maj: row.derniere_maj?.trim(),
-					url: row.url_informations?.trim()
-				  };
-				}
-			  });
-			  resolve();
-			},
-			error: reject
-		  });
-		});
-	  }
-
-	  function updateSourcesForIndicator(indicatorKey) {
-		const container = document.getElementById("source-info");
-		const list = document.getElementById("source-list");
-		list.innerHTML = "";
-
-		if (!indicatorKey || !sourceDict[indicatorKey]) {
-		  container.style.display = "none";
-		  return;
-		}
-
-		const sources = sourceDict[indicatorKey];
-		sources.forEach(src => {
-		  const meta = sourceMetaDict[src];
-		  const li = document.createElement("li");
-		  if (meta) {
-			li.innerHTML = `
-			  <strong>${src}</strong> —
-			  ${meta.description || 'Pas de description'}
-			  <br><em>Dern. mise à jour :</em> ${meta.derniere_maj || 'inconnue'}
-			  ${meta.url ? `<br><a href="${meta.url}" target="_blank">En savoir plus</a>` : ''}`;
-		  } else {
-			li.textContent = src;
-		  }
-		  list.appendChild(li);
-		});
-		container.style.display = "block";
-	  }
-
-	  // Charger les sources AVANT de gérer les changements d'indicateur
-	  Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
-		document.getElementById("indicator-select").addEventListener("change", (e) => {
-		  selectedIndicator = e.target.value || null;
-		  recolorMap();
-		  updateSourcesForIndicator(selectedIndicator);
-		});
-	  });
 	let selectedIndicator = null; // Indicateur sélectionné
 	
 	// Affichage du gradient pour les données brutes
@@ -327,37 +241,89 @@
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
 	let themeToIndicators = {};
+	let sourceMetaDict = {}; // contient les métadonnées du fichier tableau_sources_donnees.csv
 
-	function loadLabels() {
-	  return new Promise((resolve, reject) => {
-		Papa.parse("data/labels.csv", {
-		  download: true,
-		  header: true,
-		  complete: function(results) {
-			results.data.forEach(row => {
-			  const col = row.nom_colonne?.trim();
-			  const label = row.nom_complet?.trim();
-			  const themes = row.types_sources?.split(";").map(t => t.trim());
-
-			  if (col && label) {
-				labelDict[col] = label;
-
-				themes?.forEach(theme => {
-				  if (!themeToIndicators[theme]) {
-					themeToIndicators[theme] = [];
-				  }
-				  themeToIndicators[theme].push({ col, label });
-				});
-			  }
-			});
-
-			populateThemeSelect(); // Init menu une fois chargé
-			resolve();
-		  },
-		  error: reject
+	  // Charger les sources à partir des deux CSV
+	  function loadLabels() {
+		return new Promise((resolve, reject) => {
+		  Papa.parse("data/labels.csv", {
+			download: true,
+			header: true,
+			complete: function(results) {
+			  results.data.forEach(row => {
+				const col = row.nom_colonne?.trim();
+				const sources = row.nom_source?.split(';').map(s => s.trim()).filter(Boolean) || [];
+				if (col) {
+				  sourceDict[col] = sources;
+				}
+			  });
+			  resolve();
+			},
+			error: reject
+		  });
 		});
-	  });
-	}
+	  }
+
+	  function loadSourceMetadata() {
+		return new Promise((resolve, reject) => {
+		  Papa.parse("data/tableau_sources_donnees.csv", {
+			download: true,
+			header: true,
+			delimiter: ";",
+			complete: function(results) {
+			  results.data.forEach(row => {
+				const nom = row.nom?.trim();
+				if (nom) {
+				  sourceMetaDict[nom] = {
+					description: row.description?.trim(),
+					derniere_maj: row.derniere_maj?.trim(),
+					url: row.url_informations?.trim()
+				  };
+				}
+			  });
+			  resolve();
+			},
+			error: reject
+		  });
+		});
+	  }
+
+  function updateSourcesForIndicator(indicatorKey) {
+    const container = document.getElementById("source-info");
+    const list = document.getElementById("source-list");
+    list.innerHTML = "";
+
+    if (!indicatorKey || !sourceDict[indicatorKey]) {
+      container.style.display = "none";
+      return;
+    }
+
+    const sources = sourceDict[indicatorKey];
+    sources.forEach(src => {
+      const meta = sourceMetaDict[src];
+      const li = document.createElement("li");
+      if (meta) {
+        li.innerHTML = `
+          <strong>${src}</strong> —
+          ${meta.description || 'Pas de description'}
+          <br><em>Dern. mise à jour :</em> ${meta.derniere_maj || 'inconnue'}
+          ${meta.url ? `<br><a href="${meta.url}" target="_blank">En savoir plus</a>` : ''}`;
+      } else {
+        li.textContent = src;
+      }
+      list.appendChild(li);
+    });
+    container.style.display = "block";
+  }
+
+  // Charger les sources AVANT de gérer les changements d'indicateur
+  Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
+    document.getElementById("indicator-select").addEventListener("change", (e) => {
+      selectedIndicator = e.target.value || null;
+      recolorMap();
+      updateSourcesForIndicator(selectedIndicator);
+    });
+  });
 	
 	function populateThemeSelect() {
 	  const themeSelect = document.getElementById("theme-select");
