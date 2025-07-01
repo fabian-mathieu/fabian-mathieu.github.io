@@ -106,10 +106,10 @@
         <img src="img/network_blue.svg" width="24" height="24" style="margin-right: 10px;">
         <div style="flex-grow: 1;">
           <div>Diversité fonctionnelle</div>
-          <div class="progress-bar" id="diversite-progress">
+          <div class="progress-bar" id="diversite_fonctionnelle-progress">
             <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
-          <div id="diversite-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+          <div id="diversite_fonctionnelle-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
       </div>
 	
@@ -117,10 +117,10 @@
         <img src="img/go-to-work_blue.svg" width="24" height="24" style="margin-right: 10px;">
         <div style="flex-grow: 1;">
           <div>Schéma de mobilité</div>
-          <div class="progress-bar" id="mobilite-progress">
+          <div class="progress-bar" id="schema-mobilite-progress">
             <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
-          <div id="mobilite-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+          <div id="schema_mobilite-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
       </div>
     </div>
@@ -301,69 +301,60 @@
 	
 	  <!-- Script pour l'affichage des moyennes -->
 	  // Fonction pour calculer et afficher les moyennes
-      function updateIndicateursComposites(data) {
-        const indicators = {
-          marche: { sum: 0, count: 0 },
-          velos: { sum: 0, count: 0 },
-          bus: { sum: 0, count: 0 },
-          tram: { sum: 0, count: 0 },
-          vl: { sum: 0, count: 0 },
-          autopartage: { sum: 0, count: 0 },
-		  diversite_fonctionnelle: { sum: 0, count: 0 },
-		  schema_mobilite: { sum: 0, count: 0 }
-        };
+		function updateIndicateursComposites(data) {
+		  const indicators = {
+			marche: { sum: 0, count: 0 },
+			velos: { sum: 0, count: 0 },
+			bus: { sum: 0, count: 0 },
+			tram: { sum: 0, count: 0 },
+			vl: { sum: 0, count: 0 },
+			autopartage: { sum: 0, count: 0 },
+			diversite_fonctionnelle: { sum: 0, count: 0 },
+			schema_mobilite: { sum: 0, count: 0 }
+		  };
 
-        // Calcul des sommes
-        data.features.forEach(feature => {
-          const props = feature.properties;
-          if (props.ind_compose_marche !== -1) {
-            indicators.marche.sum += props.ind_compose_marche;
-            indicators.marche.count++;
-          }
-          if (props.ind_compose_velos !== -1) {
-            indicators.velos.sum += props.ind_compose_velos;
-            indicators.velos.count++;
-          }
-          if (props.ind_compose_bus !== -1) {
-            indicators.bus.sum += props.ind_compose_bus;
-            indicators.bus.count++;
-          }
-          if (props.ind_compose_tram !== -1) {
-            indicators.tram.sum += props.ind_compose_tram;
-            indicators.tram.count++;
-          }
-          if (props.ind_compose_vl !== -1) {
-            indicators.vl.sum += props.ind_compose_vl;
-            indicators.vl.count++;
-          }
-          if (props.ind_compose_autopartage !== -1) {
-            indicators.autopartage.sum += props.ind_compose_autopartage;
-            indicators.autopartage.count++;
-          }
-		  if (props.ind_diversite_fonctionnelle !== -1) {
-            indicators.autopartage.sum += props.ind_compose_autopartage;
-            indicators.autopartage.count++;
-          }
-		  if (props.ind_diversite_fonctionnelle !== -1) {
-            indicators.diversite_fonctionnelle.sum += props.ind_diversite_fonctionnelle;
-            indicators.diversite_fonctionnelle.count++;
-          }
-		  if (props.ind_schema_mobilite !== -1) {
-            indicators.schema_mobilite.sum += props.ind_schema_mobilite;
-            indicators.schema_mobilite.count++;
-          }
-        });
+		  // Accès aux champs dans le GeoJSON
+		  data.features.forEach(feature => {
+			const props = feature.properties;
 
-        // Calcul et affichage des moyennes
-        for (const [key, value] of Object.entries(indicators)) {
-          const avg = value.count > 0 ? (value.sum / value.count) : 0;
-          const percent = (avg * 100).toFixed(0);
-          const formattedValue = avg.toFixed(2);
-          
-          document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
-          document.getElementById(`${key}-value`).textContent = formattedValue;
-        }
-      }
+			const keys = {
+			  marche: 'ind_compose_marche',
+			  velos: 'ind_compose_velos',
+			  bus: 'ind_compose_bus',
+			  tram: 'ind_compose_tram',
+			  vl: 'ind_compose_vl',
+			  autopartage: 'ind_compose_autopartage',
+			  diversite_fonctionnelle: 'ind_diversite_fonctionnelle',
+			  schema_mobilite: 'ind_schema_mobilite'
+			};
+
+			for (const [key, field] of Object.entries(keys)) {
+			  const val = props[field];
+			  if (val !== -1 && val != null && !isNaN(val)) {
+				indicators[key].sum += val;
+				indicators[key].count++;
+			  }
+			}
+		  });
+
+		  // Mise à jour des barres de progression
+		  for (const [key, stats] of Object.entries(indicators)) {
+			const avg = stats.count > 0 ? stats.sum / stats.count : 0;
+			const percent = (avg * 100).toFixed(0);
+			const formatted = avg.toFixed(2);
+
+			const bar = document.getElementById(`${key}-progress`);
+			const value = document.getElementById(`${key}-value`);
+
+			if (bar && value) {
+			  bar.firstElementChild.style.width = `${percent}%`;
+			  value.textContent = formatted;
+			} else {
+			  console.warn(`Élément manquant pour ${key}`);
+			}
+		  }
+		}
+
 
       // Chargement des données normalisées
       function loadNormalizedData() {
