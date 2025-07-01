@@ -40,7 +40,7 @@
         <div style="flex-grow: 1;">
           <div>Marche</div>
           <div class="progress-bar" id="marche-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="marche-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -51,7 +51,7 @@
         <div style="flex-grow: 1;">
           <div>Vélos</div>
           <div class="progress-bar" id="velos-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="velos-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -62,7 +62,7 @@
         <div style="flex-grow: 1;">
           <div>Bus</div>
           <div class="progress-bar" id="bus-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="bus-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -73,7 +73,7 @@
         <div style="flex-grow: 1;">
           <div>Tram</div>
           <div class="progress-bar" id="tram-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="tram-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -84,7 +84,7 @@
         <div style="flex-grow: 1;">
           <div>Véhicules légers</div>
           <div class="progress-bar" id="vl-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="vl-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -95,7 +95,7 @@
         <div style="flex-grow: 1;">
           <div>Autopartage</div>
           <div class="progress-bar" id="autopartage-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+            <div style="height: 100%; width: 0%; background: #4CAF50; border-radius: 10px;"></div>
           </div>
           <div id="autopartage-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
@@ -124,47 +124,6 @@
     <script>
 	let selectedIndicator = null; // Indicateur sélectionné
 	
-		// Chargement initial de l’EPCI et des données géographiques de base
-		Promise.all([
-		  loadEpciLayer(),
-		  fetch('data/maille_200m.geojson').then(res => res.json())
-		]).then(([epci, geojsonData]) => {
-		  epci.addTo(mymap);
-
-		  baseGeojson = L.geoJson(geojsonData, {
-			style: getBaseStyle,
-			onEachFeature: onEachFeature
-		  }).addTo(mymap);
-
-		  mymap.fitBounds(baseGeojson.getBounds());
-
-		  // Chargement des données CSV
-		  Promise.all([
-			fetchCsvData('data/donnees_brutes.csv'),
-			fetchCsvData('data/donnees_normalise.csv')
-		  ]).then(([brutes, normalisees]) => {
-			rawData = brutes;
-			normalizedData = normalisees;
-
-			enrichGeojsonWithData(baseGeojson, rawData, 'raw');
-			enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
-
-			rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-			  style: getDynamicStyle,
-			  onEachFeature: onEachFeature
-			});
-			normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-			  style: getDynamicStyle,
-			  onEachFeature: onEachFeature
-			});
-
-			rawGeojson.addTo(mymap);
-			mymap.fitBounds(rawGeojson.getBounds());
-
-			toggleData('raw');
-		  });
-		});
-	
 	// Affichage du gradient pour les données brutes
 	function getBlueGradient(value, min, max) {
 	  if (value === -1 || value === null || value === undefined || isNaN(value)) {
@@ -178,31 +137,43 @@
 
 	  return `rgb(${r},${g},${b})`;
 	}
+	
 	function getDynamicStyle(feature) {
 	  const props = feature.properties;
 
-	  if (!selectedIndicator) return getBaseStyle();
-
-	  let value;
-	  if (currentData === 'normalized') {
-		value = props[`norm__${selectedIndicator}`];
-		if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
-
-		const r = Math.round(255 * (1 - value));
-		const g = Math.round(255 * value);
-		return { ...getBaseStyle(), fillColor: `rgb(${r},${g},0)` };
+	  if (!selectedIndicator || !(selectedIndicator in props)) {
+		return getBaseStyle(); // fallback
 	  }
 
-	  value = props[selectedIndicator];
-	  const allFeatures = rawGeojson?.getLayers().map(l => l.feature) || [];
-	  const validValues = allFeatures.map(f => f.properties[selectedIndicator])
-		.filter(v => v !== -1 && v != null && !isNaN(v));
+	  const value = props[selectedIndicator];
+
+	  // Si données normalisées : du rouge au vert
+		if (currentData === 'normalized') {
+		  if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
+
+		  const r = Math.round(255 * (1 - value)); // 1 → rouge = 0
+		  const g = Math.round(255 * value);       // 1 → vert = 255
+		  const b = 0;
+
+		  return {
+			...getBaseStyle(),
+			fillColor: `rgb(${r},${g},${b})`
+		  };
+		}
+
+
+	  // Si données brutes : calcul min/max à partir du layer
+	  const allFeatures = rawGeojson ? rawGeojson.getLayers().map(l => l.feature) : [];
+	  const validValues = allFeatures.map(f => f.properties[selectedIndicator]).filter(v => v !== -1 && v != null && !isNaN(v));
+
 	  const min = Math.min(...validValues);
 	  const max = Math.max(...validValues);
 
-	  return { ...getBaseStyle(), fillColor: getBlueGradient(value, min, max) };
+	  return {
+		...getBaseStyle(),
+		fillColor: getBlueGradient(value, min, max)
+	  };
 	}
-
 
 	function recolorMap() {
 	  if (!selectedIndicator) {
@@ -231,26 +202,16 @@
 		  layer.setStyle(style);
 		});
 
-		legend.update(selectedIndicator, 0, 1, true); // valeurs fixes 0 à 1
+		legend.update(selectedIndicator, 0, 1, true);
 	  }
 	}
+
 
 
 	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
 	let labelDict = {};
 	let themeToIndicators = {};
 
-	// 1. Ajouter une variable globale pour stocker les moyennes calculées
-	let compositeAverages = {
-	  marche: 0,
-	  velos: 0,
-	  bus: 0,
-	  tram: 0,
-	  vl: 0,
-	  autopartage: 0
-	};
-
-	// 2. Modifier la fonction loadLabels comme suit
 	function loadLabels() {
 	  return new Promise((resolve, reject) => {
 		Papa.parse("data/labels.csv", {
@@ -264,112 +225,23 @@
 
 			  if (col && label) {
 				labelDict[col] = label;
+
 				themes?.forEach(theme => {
-				  if (!themeToIndicators[theme]) themeToIndicators[theme] = [];
+				  if (!themeToIndicators[theme]) {
+					themeToIndicators[theme] = [];
+				  }
 				  themeToIndicators[theme].push({ col, label });
 				});
 			  }
 			});
-			populateThemeSelect();
+
+			populateThemeSelect(); // Init menu une fois chargé
 			resolve();
 		  },
 		  error: reject
 		});
 	  });
 	}
-
-	// 3. Nouvelle fonction pour afficher les moyennes (sans les recalculer)
-	function displayCompositeAverages() {
-	  for (const [key, avg] of Object.entries(compositeAverages)) {
-		const percent = (avg * 100).toFixed(0);
-		document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
-		document.getElementById(`${key}-value`).textContent = avg.toFixed(2);
-	  }
-	}
-
-	// 4. Modifier le chargement initial
-	loadLabels().then(() => {
-	  Promise.all([
-		loadEpciLayer(),
-		fetch('data/maille_200m.geojson').then(res => res.json()),
-		fetchCsvData('data/donnees_normalise.csv') // Charger directement les données normalisées
-	  ]).then(([epci, geojsonData, normalisees]) => {
-		// 1. Afficher la carte
-		epci.addTo(mymap);
-		baseGeojson = L.geoJson(geojsonData, { style: getBaseStyle, onEachFeature: onEachFeature });
-		
-		// 2. Calculer et stocker les moyennes
-		calculateCompositeAverages(normalisees);
-		displayCompositeAverages(); // Afficher immédiatement
-		
-		// 3. Continuer avec le reste du chargement
-		return fetchCsvData('data/donnees_brutes.csv').then(brutes => {
-		  rawData = brutes;
-		  normalizedData = normalisees;
-		  
-		  enrichGeojsonWithData(baseGeojson, rawData, 'raw');
-		  enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
-
-		  rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), { style: getDynamicStyle, onEachFeature: onEachFeature });
-		  normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), { style: getDynamicStyle, onEachFeature: onEachFeature });
-
-		  rawGeojson.addTo(mymap);
-		  mymap.fitBounds(rawGeojson.getBounds());
-		  toggleData('raw');
-		});
-	  });
-	});
-
-	// 5. Nouvelle fonction pour calculer et stocker les moyennes
-	function calculateCompositeAverages(csvData) {
-	  const indicators = {
-		marche: { sum: 0, count: 0 },
-		velos: { sum: 0, count: 0 },
-		bus: { sum: 0, count: 0 },
-		tram: { sum: 0, count: 0 },
-		vl: { sum: 0, count: 0 },
-		autopartage: { sum: 0, count: 0 }
-	  };
-
-	  Object.values(csvData).forEach(row => {
-		const keys = {
-		  marche: 'ind_compose_marche',
-		  velos: 'ind_compose_velos',
-		  bus: 'ind_compose_bus',
-		  tram: 'ind_compose_tram',
-		  vl: 'ind_compose_vl',
-		  autopartage: 'ind_compose_autopartage'
-		};
-
-		for (const [key, dataKey] of Object.entries(keys)) {
-		  const val = row[dataKey];
-		  if (val !== -1 && val != null && !isNaN(val)) {
-			indicators[key].sum += val;
-			indicators[key].count++;
-		  }
-		}
-	  });
-
-	  // Stocker les moyennes calculées
-	  for (const [key, value] of Object.entries(indicators)) {
-		compositeAverages[key] = value.count > 0 ? (value.sum / value.count) : 0;
-	  }
-	}
-
-	  // Mettre à jour l'interface
-	  for (const [key, value] of Object.entries(indicators)) {
-		const avg = value.count > 0 ? (value.sum / value.count) : 0;
-		const percent = (avg * 100).toFixed(0);
-		const formattedValue = avg.toFixed(2);
-		
-		const progressBar = document.getElementById(`${key}-progress`).firstElementChild;
-		const valueDisplay = document.getElementById(`${key}-value`);
-		
-		if (progressBar && valueDisplay) {
-		  progressBar.style.width = `${percent}%`;
-		  valueDisplay.textContent = formattedValue;
-		}
-	  }
 	
 	function populateThemeSelect() {
 	  const themeSelect = document.getElementById("theme-select");
@@ -404,63 +276,96 @@
 
 	
 	  <!-- Script pour l'affichage des moyennes -->
+	  // Fonction pour calculer et afficher les moyennes
+      function updateIndicateursComposites(data) {
+        const indicators = {
+          marche: { sum: 0, count: 0 },
+          velos: { sum: 0, count: 0 },
+          bus: { sum: 0, count: 0 },
+          tram: { sum: 0, count: 0 },
+          vl: { sum: 0, count: 0 },
+          autopartage: { sum: 0, count: 0 }
+        };
 
+        // Calcul des sommes
+        data.features.forEach(feature => {
+          const props = feature.properties;
+          if (props.ind_compose_marche !== -1) {
+            indicators.marche.sum += props.ind_compose_marche;
+            indicators.marche.count++;
+          }
+          if (props.ind_compose_velos !== -1) {
+            indicators.velos.sum += props.ind_compose_velos;
+            indicators.velos.count++;
+          }
+          if (props.ind_compose_bus !== -1) {
+            indicators.bus.sum += props.ind_compose_bus;
+            indicators.bus.count++;
+          }
+          if (props.ind_compose_tram !== -1) {
+            indicators.tram.sum += props.ind_compose_tram;
+            indicators.tram.count++;
+          }
+          if (props.ind_compose_vl !== -1) {
+            indicators.vl.sum += props.ind_compose_vl;
+            indicators.vl.count++;
+          }
+          if (props.ind_compose_autopartage !== -1) {
+            indicators.autopartage.sum += props.ind_compose_autopartage;
+            indicators.autopartage.count++;
+          }
+        });
 
+        // Calcul et affichage des moyennes
+        for (const [key, value] of Object.entries(indicators)) {
+          const avg = value.count > 0 ? (value.sum / value.count) : 0;
+          const percent = (avg * 100).toFixed(0);
+          const formattedValue = avg.toFixed(2);
+          
+          document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
+          document.getElementById(`${key}-value`).textContent = formattedValue;
+        }
+      }
+
+      // Chargement des données normalisées
+      function loadNormalizedData() {
+        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
+          .then(response => response.json())
+          .then(data => {
+            if (normalizedGeojson) {
+              mymap.removeLayer(normalizedGeojson);
+            }
+            normalizedGeojson = L.geoJson(data, {
+              style: getBaseStyle,
+              onEachFeature: onEachFeature
+            });
+            
+            // Mise à jour des indicateurs composites
+            updateIndicateursComposites(data);
+            
+            return normalizedGeojson;
+          });
+      }
 		// Chargement des noms corrects des indicateurs
-		  loadLabels().then(() => {
-			Promise.all([
-			  loadEpciLayer(),
-			  fetch('data/maille_200m.geojson').then(res => res.json())
-			]).then(([epci, geojsonData]) => {
-			  epci.addTo(mymap);
-
-			  baseGeojson = L.geoJson(geojsonData, {
-				style: getBaseStyle,
-				onEachFeature: onEachFeature
-			  });
-			  
-		calculerMoyennesIndicateursCompositesDepuisCSV("data/donnees_normalise.csv");
-
-			  // Ajoute au chargement, mais seulement après enrichissement
-			  Promise.all([
-				fetchCsvData('data/donnees_brutes.csv'),
-				fetchCsvData('data/donnees_normalise.csv')
-			  ]).then(([brutes, normalisees]) => {
-				rawData = brutes;
-				normalizedData = normalisees;
-
-				enrichGeojsonWithData(baseGeojson, rawData, 'raw');
-				enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
-
-				// Crée les deux couches GeoJSON enrichies
-				rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-				  style: getDynamicStyle,
-				  onEachFeature: onEachFeature
-				});
-				normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-				  style: getDynamicStyle,
-				  onEachFeature: onEachFeature
-				});
-
-				// Ajoute rawGeojson à la carte
-				rawGeojson.addTo(mymap);
-				mymap.fitBounds(rawGeojson.getBounds());
-				
-
-				// Active la vue "raw"
-				toggleData('raw');
-
-			  });
-			});
-
-			document.getElementById("theme-select").addEventListener("change", (e) => {
-			  populateIndicatorSelect(e.target.value);
-			});
-			document.getElementById("indicator-select").addEventListener("change", (e) => {
-			  selectedIndicator = e.target.value || null;
-			  recolorMap();
-			});
+		loadLabels().then(() => {
+		  Promise.all([
+			loadEpciLayer(),
+			loadRawData()
+		  ]).then(([epci, rawData]) => {
+			epci.addTo(mymap);
+			rawData.addTo(mymap);
+			mymap.fitBounds(rawData.getBounds());
 		  });
+		  document.getElementById("theme-select").addEventListener("change", (e) => {
+			populateIndicatorSelect(e.target.value);
+		  });
+		  document.getElementById("indicator-select").addEventListener("change", (e) => {
+			selectedIndicator = e.target.value || null;
+			recolorMap();
+		});
+		});
+
+
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
 
       var baselayers = {
@@ -635,6 +540,44 @@
           });
       }
 
+      // Chargement des données brutes
+	function loadRawData() {
+	  return fetch('data/maille_200m_avec_donnees.geojson')
+		.then(response => response.json())
+		.then(data => {
+		  if (rawGeojson) {
+			mymap.removeLayer(rawGeojson);
+		  }
+		  rawGeojson = L.geoJson(data, {
+			style: getDynamicStyle,
+			onEachFeature: onEachFeature
+		  });
+		  return rawGeojson;
+		});
+	}
+
+
+      // Chargement des données normalisées
+	function loadNormalizedData() {
+	  return fetch('data/maille_200m_avec_donnees_normalise.geojson')
+		.then(response => response.json())
+		.then(data => {
+		  if (normalizedGeojson) {
+			mymap.removeLayer(normalizedGeojson);
+		  }
+		  normalizedGeojson = L.geoJson(data, {
+			style: getDynamicStyle, // utilise le style dynamique
+			onEachFeature: onEachFeature
+		  });
+
+		  // Mise à jour des indicateurs composites
+		  updateIndicateursComposites(data);
+
+		  return normalizedGeojson;
+		});
+}
+
+
       // Basculer entre les données brutes et normalisées
       function toggleData(type) {
         currentData = type;
@@ -646,11 +589,11 @@
         // Charger les données si nécessaire et les afficher
         if (type === 'raw') {
           if (!rawGeojson) {
-			if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
-			rawGeojson.addTo(mymap);
-			mymap.fitBounds(rawGeojson.getBounds());
-		}
-		else {
+            loadRawData().then(geojson => {
+              geojson.addTo(mymap);
+              mymap.fitBounds(geojson.getBounds());
+            });
+          } else {
             if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
             rawGeojson.addTo(mymap);
 			recolorMap();
@@ -667,103 +610,28 @@
           }
         }
       }
-	  
-	let baseGeojson;
-	let rawData = {}, normalizedData = {};
-	
-		function calculerMoyennesIndicateursCompositesDepuisCSV(path) {
-		  const champs = [
-			'ind_compose_marche',
-			'ind_compose_velos',
-			'ind_compose_bus',
-			'ind_compose_tram',
-			'ind_compose_vl',
-			'ind_compose_autopartage'
-		  ];
 
-		  const stats = {
-			ind_compose_marche: { sum: 0, count: 0 },
-			ind_compose_velos: { sum: 0, count: 0 },
-			ind_compose_bus: { sum: 0, count: 0 },
-			ind_compose_tram: { sum: 0, count: 0 },
-			ind_compose_vl: { sum: 0, count: 0 },
-			ind_compose_autopartage: { sum: 0, count: 0 }
-		  };
+      // Écouteurs d'événements pour les boutons
+      document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
+      document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
 
-		  Papa.parse(path, {
-			download: true,
-			header: true,
-			dynamicTyping: true,
-			complete: function(results) {
-			  results.data.forEach(row => {
-				champs.forEach(champ => {
-				  const val = row[champ];
-				  if (val !== -1 && val != null && !isNaN(val)) {
-					stats[champ].sum += val;
-					stats[champ].count += 1;
-				  }
-				});
-			  });
+		// Chargement initial
+		Promise.all([
+		  loadEpciLayer(),
+		  loadRawData()
+		]).then(([epci, rawData]) => {
+		  epci.addTo(mymap);
+		  rawData.addTo(mymap);
+		  mymap.fitBounds(rawData.getBounds());
 
-			  // Affichage dans les barres de progression
-			  champs.forEach(champ => {
-				const key = champ.replace('ind_compose_', ''); // ex: "marche"
-				const total = stats[champ];
-				const avg = total.count > 0 ? total.sum / total.count : 0;
-				const percent = (avg * 100).toFixed(0);
-				const formatted = avg.toFixed(2);
-
-				document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
-				document.getElementById(`${key}-value`).textContent = formatted;
-			  });
-			}
-		  });
-		}
-
-		
-	function fetchCsvData(path) {
-	  return new Promise((resolve, reject) => {
-		Papa.parse(path, {
-		  download: true,
-		  header: true,
-		  dynamicTyping: true,
-		  complete: (results) => {
-			const dict = {};
-			results.data.forEach(row => {
-			  if (row.idINSPIRE) {
-				dict[row.idINSPIRE] = row;
-			  }
+		  // Chargement immédiat des données normalisées pour calculer les moyennes
+		  fetch('data/maille_200m_avec_donnees_normalise.geojson')
+			.then(response => response.json())
+			.then(normalizedData => {
+			  updateIndicateursComposites(normalizedData);
 			});
-			resolve(dict);
-		  },
-		  error: reject
 		});
-	  });
-	}
-
-	function enrichGeojsonWithData(layerGroup, dataDict, type) {
-	  layerGroup.eachLayer(layer => {
-		const id = layer.feature.properties.idINSPIRE;
-		const data = dataDict[id];
-		if (data) {
-		  for (const [key, value] of Object.entries(data)) {
-			if (type === 'raw') {
-			  layer.feature.properties[key] = value;
-			} else if (type === 'normalized') {
-			  layer.feature.properties[`norm__${key}`] = value;
-			}
-		  }
-		}
-	  });
-	}
-
-
-	// Écouteurs d'événements pour les boutons
-	document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
-	document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
-
-
-
+		
 		// Légende dynamique (ajoutée à droite)
 		var legend = L.control({ position: 'bottomright' });
 
@@ -803,6 +671,8 @@
 		};
 
 		legend.addTo(mymap);
+
+
 
     </script>
   </main>
