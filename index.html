@@ -161,11 +161,6 @@
 			rawGeojson.addTo(mymap);
 			mymap.fitBounds(rawGeojson.getBounds());
 
-			// Calcul UNE SEULE FOIS les moyennes sur les données brutes uniquement
-			updateIndicateursComposites({
-			  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
-			});
-
 			toggleData('raw');
 		  });
 		});
@@ -245,14 +240,23 @@
 	let labelDict = {};
 	let themeToIndicators = {};
 
+	// 1. Ajouter une variable globale pour stocker les moyennes calculées
+	let compositeAverages = {
+	  marche: 0,
+	  velos: 0,
+	  bus: 0,
+	  tram: 0,
+	  vl: 0,
+	  autopartage: 0
+	};
+
+	// 2. Modifier la fonction loadLabels comme suit
 	function loadLabels() {
 	  return new Promise((resolve, reject) => {
-		// Chargement des labels en premier
 		Papa.parse("data/labels.csv", {
 		  download: true,
 		  header: true,
 		  complete: function(results) {
-			// Traitement des labels comme avant
 			results.data.forEach(row => {
 			  const col = row.nom_colonne?.trim();
 			  const label = row.nom_complet?.trim();
@@ -260,40 +264,64 @@
 
 			  if (col && label) {
 				labelDict[col] = label;
-
 				themes?.forEach(theme => {
-				  if (!themeToIndicators[theme]) {
-					themeToIndicators[theme] = [];
-				  }
+				  if (!themeToIndicators[theme]) themeToIndicators[theme] = [];
 				  themeToIndicators[theme].push({ col, label });
 				});
 			  }
 			});
-
-			populateThemeSelect(); // Init menu une fois chargé
-
-			// Maintenant charger les données CSV pour les moyennes
-			Promise.all([
-			  fetchCsvData('data/donnees_brutes.csv'),
-			  fetchCsvData('data/donnees_normalise.csv')
-			]).then(([brutes, normalisees]) => {
-			  // Stocker les données pour usage ultérieur
-			  rawData = brutes;
-			  normalizedData = normalisees;
-
-			  // Calculer les moyennes immédiatement
-			  updateIndicateursCompositesDepuisCSV(normalisees);
-			  
-			  // Résoudre la promesse pour continuer le flux
-			  resolve();
-			}).catch(reject);
+			populateThemeSelect();
+			resolve();
 		  },
 		  error: reject
 		});
 	  });
 	}
-	
-	function updateIndicateursCompositesDepuisCSV(csvData) {
+
+	// 3. Nouvelle fonction pour afficher les moyennes (sans les recalculer)
+	function displayCompositeAverages() {
+	  for (const [key, avg] of Object.entries(compositeAverages)) {
+		const percent = (avg * 100).toFixed(0);
+		document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
+		document.getElementById(`${key}-value`).textContent = avg.toFixed(2);
+	  }
+	}
+
+	// 4. Modifier le chargement initial
+	loadLabels().then(() => {
+	  Promise.all([
+		loadEpciLayer(),
+		fetch('data/maille_200m.geojson').then(res => res.json()),
+		fetchCsvData('data/donnees_normalise.csv') // Charger directement les données normalisées
+	  ]).then(([epci, geojsonData, normalisees]) => {
+		// 1. Afficher la carte
+		epci.addTo(mymap);
+		baseGeojson = L.geoJson(geojsonData, { style: getBaseStyle, onEachFeature: onEachFeature });
+		
+		// 2. Calculer et stocker les moyennes
+		calculateCompositeAverages(normalisees);
+		displayCompositeAverages(); // Afficher immédiatement
+		
+		// 3. Continuer avec le reste du chargement
+		return fetchCsvData('data/donnees_brutes.csv').then(brutes => {
+		  rawData = brutes;
+		  normalizedData = normalisees;
+		  
+		  enrichGeojsonWithData(baseGeojson, rawData, 'raw');
+		  enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
+
+		  rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), { style: getDynamicStyle, onEachFeature: onEachFeature });
+		  normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), { style: getDynamicStyle, onEachFeature: onEachFeature });
+
+		  rawGeojson.addTo(mymap);
+		  mymap.fitBounds(rawGeojson.getBounds());
+		  toggleData('raw');
+		});
+	  });
+	});
+
+	// 5. Nouvelle fonction pour calculer et stocker les moyennes
+	function calculateCompositeAverages(csvData) {
 	  const indicators = {
 		marche: { sum: 0, count: 0 },
 		velos: { sum: 0, count: 0 },
@@ -303,7 +331,6 @@
 		autopartage: { sum: 0, count: 0 }
 	  };
 
-	  // Parcourir toutes les entrées du CSV
 	  Object.values(csvData).forEach(row => {
 		const keys = {
 		  marche: 'ind_compose_marche',
@@ -322,6 +349,12 @@
 		  }
 		}
 	  });
+
+	  // Stocker les moyennes calculées
+	  for (const [key, value] of Object.entries(indicators)) {
+		compositeAverages[key] = value.count > 0 ? (value.sum / value.count) : 0;
+	  }
+	}
 
 	  // Mettre à jour l'interface
 	  for (const [key, value] of Object.entries(indicators)) {
@@ -372,48 +405,6 @@
 
 	
 	  <!-- Script pour l'affichage des moyennes -->
-	  // Fonction pour calculer et afficher les moyennes
-		function updateIndicateursComposites(data) {
-		  const indicators = {
-			marche: { sum: 0, count: 0 },
-			velos: { sum: 0, count: 0 },
-			bus: { sum: 0, count: 0 },
-			tram: { sum: 0, count: 0 },
-			vl: { sum: 0, count: 0 },
-			autopartage: { sum: 0, count: 0 }
-		  };
-
-		  const prefix = (currentData === 'normalized') ? 'norm__' : '';
-
-		  data.features.forEach(feature => {
-			const props = feature.properties;
-
-			const keys = {
-			  marche: `${prefix}ind_compose_marche`,
-			  velos: `${prefix}ind_compose_velos`,
-			  bus: `${prefix}ind_compose_bus`,
-			  tram: `${prefix}ind_compose_tram`,
-			  vl: `${prefix}ind_compose_vl`,
-			  autopartage: `${prefix}ind_compose_autopartage`
-			};
-
-			for (const [key, dataKey] of Object.entries(keys)) {
-			  const val = props[dataKey];
-			  if (val !== -1 && val != null && !isNaN(val)) {
-				indicators[key].sum += val;
-				indicators[key].count++;
-			  }
-			}
-		  });
-
-		  for (const [key, value] of Object.entries(indicators)) {
-			const avg = value.count > 0 ? (value.sum / value.count) : 0;
-			const percent = (avg * 100).toFixed(0);
-			const formattedValue = avg.toFixed(2);
-			document.getElementById(`${key}-progress`).firstElementChild.style.width = `${percent}%`;
-			document.getElementById(`${key}-value`).textContent = formattedValue;
-		  }
-		}
 
 
 		// Chargement des noms corrects des indicateurs
@@ -456,10 +447,6 @@
 				rawGeojson.addTo(mymap);
 				mymap.fitBounds(rawGeojson.getBounds());
 				
-				// Calculer et afficher les moyennes dès le chargement
-				updateIndicateursComposites({
-				  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
-				});
 
 				// Active la vue "raw"
 				toggleData('raw');
