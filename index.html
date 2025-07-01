@@ -649,7 +649,13 @@
 		enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
 
 		// Calcul des moyennes initiales
-		updateIndicateursComposites({ features: baseGeojson.getLayers().map(l => ({ properties: l.feature.properties })) });
+		// ✅ Appelle updateIndicateursComposites ici avec rawGeojson :
+		updateIndicateursComposites({
+		  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
+		});
+
+		// ✅ Appelle aussi toggleData ici pour forcer l’état visuel
+		toggleData('raw');
 	  });
 	});
 
