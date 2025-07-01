@@ -1,56 +1,56 @@
-nom_colonne,nom_complet,types_sources
-part_surface_pietonne,Part de la surface accessible par le réseau pédestre,Marche
-part_vegetation,Part de la surface occupée par la végétation,Marche
-ratio_hl_bati_rues,Rapport moyen entre la hauteur des bâtiments et la largeur des rues,Marche
-part_routes_lentes,Part des rues dont la moyenne est de moins de 30 km /h,Marche;Vélos
-part_routes_inaccessibles_vl,Part des rues inaccessibles aux VL,Marche;Vélos
-part_parcs,Part des parcs dans l'aire urbaine,Marche
-marche_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (marche),Marche
-marche_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (marche),Marche
-part_surface_cyclable,Part de la surface accessible par le réseau cyclable,Vélos
-part_normalise_surface_couverte_stations_velos,Part de la surface à moins de 400m d'une station Vélhop,Vélos
-part_routes_interdites_pl,Part des rues interdites aux poids lourds,Vélos
-part_routes_pavees,Part de rues pavées,Vélos
-pente_moyenne_absolue,Pente moyenne des rues (valeur absolue),Vélos
-part_normalise_couverte_stations_rep_velos,Part de la surface à moins de 400m d'une station d'autoréparation de vélos,Vélos
-velos_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (vélos),Vélos
-velos_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (marche),Vélos
-att_moy_semaine_bus,Temps d'attente moyen hebdomadaire pour un bus,Bus
-cout_horaire_bus,Coût horaire (€ / h),Bus
-ratio_arrets_pr_bus,Part des arrêts de bus disposant d'un parking relais à moins de 400 mètres,Bus
-ratio_arrets_autopartage_bus,Part des arrêts de bus disposant d'une station d'autopartage à moins de 400 mètres,Bus
-part_routes_bus,Part des routes réservées aux bus,Bus
-part_batie_autour_arrets_bus,Part de surface bâtie autour des arrêts de bus,Bus
-marche_bus_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (bus),Bus
-marche_bus_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (bus),Bus
-att_moy_semaine_tram,Temps d'attente moyen hebdomadaire pour un tram,Tram
-cout_horaire_tram,Coût horaire des tram(€ / h),Tram
-ratio_arrets_pr_tram,Part des arrêts de tram disposant d'un parking relais à moins de 400 mètres,Tram
-ratio_arrets_autopartage_tram,Part des arrêts de tram disposant d'une station d'autopartage à moins de 400 mètres,Tram
-part_routes_tram,Part des routes réservées aux tram,Tram
-part_batie_autour_arrets_tram,Part de surface bâtie autour des arrêts de tram,Tram
-marche_tram_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (tram),Tram
-marche_tram_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (tram),Tram
-part_normalise_couverte_autopartage,Part de surface présente à moins de 400 mètres d'une station d'autopartage,Autopartage
-autopartage_cout_rapport_revenu,Coût horaire d'utilisation d'un véhicule en autopartage rapporté au revenu médian de la population (2021),Autopartage
-part_routes_accessibles_vl,Part des routes accessibles aux véhicules,Autopartage
-part_surface_geofencing_citiz,Part de surface couverte par des zones de dépose-libre Citiz,Autopartage
-autopartage_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (autopartage),Autopartage
-autopartage_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (autopartage),Autopartage
-part_sens_unique,Part des routes à sens unique,Véhicules légers
-part_zfe,Part couverte par des réglementations antipollution,Véhicules légers
-nb_feux_circulation,Nombre de feux de circulation,Véhicules légers
-places_stationnement_par_habitant,Nombre de places de stationnement par habitant,Véhicules légers
-cout_moyen_stationnement,Coût moyen horaire du stationnement,Véhicules légers
-bornes_ve_par_habitant,Nombre de borne de recharge pour véhicules électriques par habitant,Véhicules légers
-vl_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (véhicules légers),Véhicules légers
-vl_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (véhicules légers),Véhicules légers
-HSMI_global,Indice de mixité logement / services, Diversité fonctionnelle
-HEMI,Indice de mixité logement / emplois,Diversité fonctionnelle
-part_marche,Part de navetteurs utilisant principalement la marche,Schémas de mobilité
-part_velos,Part de navetteurs utilisant principalement le vélos,Schémas de mobilité
-part_communs,Part de navetteurs utilisant principalement les transports en communs,Schémas de mobilité
-part_vl,Part de navetteurs utilisant principalement les véhicules légers,Schémas de mobilité
-part_surface_bruit_53db, Part de surface où le bruit routier moyen journalier est une nuisance (53 dB ou +), Mobilité durable
-part_surface_transport, Part d'occupation du sol par les infrastructures de transport, Mobilité durable
-nb_accidents_circulation, Nombre d'accidents liés aux transports, Mobilité durable
+nom_colonne,nom_complet,types_sources,nom_source
+part_surface_pietonne,Part de la surface accessible par le réseau pédestre,Marche,bd_topo
+part_vegetation,Part de la surface occupée par la végétation,Marche, API Copernicus (Avril 2025)
+ratio_hl_bati_rues,Rapport moyen entre la hauteur des bâtiments et la largeur des rues,Marche,bd_topo
+part_routes_lentes,Part des rues dont la moyenne est de moins de 30 km /h,Marche;Vélos,bd_topo
+part_routes_inaccessibles_vl,Part des rues inaccessibles aux VL,Marche;Vélos,bd_topo
+part_parcs,Part des parcs dans l'aire urbaine,Marche, © les contributeurs OpenStreetMap
+marche_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (marche),Marche,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+marche_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (marche),Marche,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+part_surface_cyclable,Part de la surface accessible par le réseau cyclable,Vélos,bd_topo
+part_normalise_surface_couverte_stations_velos,Part de la surface à moins de 400m d'une station Vélhop,Vélos,bd_topo;gtfs_ems
+part_routes_interdites_pl,Part des rues interdites aux poids lourds,Vélos,bd_topo
+part_routes_pavees,Part de rues pavées,Vélos,
+pente_moyenne_absolue,Pente moyenne des rues (valeur absolue),Vélos,bd_topo
+part_normalise_couverte_stations_rep_velos,Part de la surface à moins de 400m d'une station d'autoréparation de vélos,Vélos,bd_topo;© les contributeurs OpenStreetMap;stations_velos
+velos_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (vélos),Vélos,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+velos_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (marche),Vélos,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+att_moy_semaine_bus,Temps d'attente moyen hebdomadaire pour un bus,Bus,bd_topo;gtfs_ems
+cout_horaire_bus,Coût horaire (€ / h),Bus,gtfs_ems
+ratio_arrets_pr_bus,Part des arrêts de bus disposant d'un parking relais à moins de 400 mètres,Bus,bd_topo;gtfs_ems
+ratio_arrets_autopartage_bus,Part des arrêts de bus disposant d'une station d'autopartage à moins de 400 mètres,Bus,citiz_gbfs;gtfs_ems
+part_routes_bus,Part des routes réservées aux bus,Bus,lignes_bus;bd_topo
+part_batie_autour_arrets_bus,Part de surface bâtie autour des arrêts de bus,Bus,bd_topo;gtfs_ems
+marche_bus_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (bus),Bus,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+marche_bus_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (bus),Busbd_topo;Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+att_moy_semaine_tram,Temps d'attente moyen hebdomadaire pour un tram,Tram,gtfs_ems
+cout_horaire_tram,Coût horaire des tram(€ / h),Tram,gtfs_ems
+ratio_arrets_pr_tram,Part des arrêts de tram disposant d'un parking relais à moins de 400 mètres,Tram,bd_topo;gtfs_ems
+ratio_arrets_autopartage_tram,Part des arrêts de tram disposant d'une station d'autopartage à moins de 400 mètres,Tram,citiz_gbfs;gtfs_ems
+part_routes_tram,Part des routes réservées aux tram,Tram,bd_topo;bd_topo;lignes_tram
+part_batie_autour_arrets_tram,Part de surface bâtie autour des arrêts de tram,Tram,
+marche_tram_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (tram),Tram,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+marche_tram_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (tram),Tram,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+part_normalise_couverte_autopartage,Part de surface présente à moins de 400 mètres d'une station d'autopartage,Autopartage,bd_topo;citiz_gbfs
+autopartage_cout_rapport_revenu,Coût horaire d'utilisation d'un véhicule en autopartage rapporté au revenu médian de la population (2021),Autopartage,citiz_gbfs;insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+part_routes_accessibles_vl,Part des routes accessibles aux véhicules,Autopartage,bd_topo;citiz_gbfs
+part_surface_geofencing_citiz,Part de surface couverte par des zones de dépose-libre Citiz,Autopartage,citiz_bbfs
+autopartage_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (autopartage),Autopartage,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+autopartage_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (autopartage),Autopartage,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+part_sens_unique,Part des routes à sens unique,Véhicules légers,bd_topo
+part_zfe,Part couverte par des réglementations antipollution,Véhicules légers,zfe_aires;zfe_voies
+nb_feux_circulation,Nombre de feux de circulation,Véhicules légers,signalisation_verticale
+places_stationnement_par_habitant,Nombre de places de stationnement par habitant,Véhicules légers,bd_topo;stationnement_vl;insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+cout_moyen_stationnement,Coût moyen horaire du stationnement,Véhicules légers,zones_stationnement_payant
+bornes_ve_par_habitant,Nombre de borne de recharge pour véhicules électriques par habitant,Véhicules légers,bornes_ve;insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+vl_ratio_emplois,Part des emplois accessibles en moins de 15 minutes (véhicules légers),Véhicules légers,bd_topo; Données SIRENE (Juin 2025, INSEE)
+vl_ratio_services_dom_moyenne,Part des services accessibles en moins de 15 minutes (véhicules légers),Véhicules légers,bd_topo; Données SIRENE (Juin 2025, INSEE);insee_bpe_2023
+HSMI_global,Indice de mixité logement / services, Diversité fonctionnelle,insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris;insee_bpe_2023
+HEMI,Indice de mixité logement / emplois,Diversité fonctionnelle,insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris;Données SIRENE (Juin 2025, INSEE)
+part_marche,Part de navetteurs utilisant principalement la marche,Schémas de mobilité, insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+part_velos,Part de navetteurs utilisant principalement le vélos,Schémas de mobilité,insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+part_communs,Part de navetteurs utilisant principalement les transports en communs,Schémas de mobilité,insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+part_vl,Part de navetteurs utilisant principalement les véhicules légers,Schémas de mobilité,insee_iris;insee_pop_2021_iris;insee_rev_2021_com;insee_rev_dec_2021_iris;insee_rev_dis_2021_iris
+part_surface_bruit_53db, Part de surface où le bruit routier moyen journalier est une nuisance (53 dB ou +), Mobilité durable,ems_bruits_2022
+part_surface_transport, Part d'occupation du sol par les infrastructures de transport, Mobilité durable,bd_topo;lignes_bus;lignes_tram;
+nb_accidents_circulation, Nombre d'accidents liés aux transports, Mobilité durable,accidents_2023_caract;accidents_2023_lieux;accidents_2023_usagers;accidents_2023_vehicules
