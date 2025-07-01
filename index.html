@@ -360,7 +360,7 @@
 
 
 		// Chargement des noms corrects des indicateurs
-		loadLabels().then(() => {
+		  loadLabels().then(() => {
 			Promise.all([
 			  loadEpciLayer(),
 			  fetch('data/maille_200m.geojson').then(res => res.json())
@@ -383,19 +383,6 @@
 				enrichGeojsonWithData(baseGeojson, rawData, 'raw');
 				enrichGeojsonWithData(baseGeojson, normalizedData, 'normalized');
 
-				// Clone baseGeojson pour raw et normalized
-				rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-				  style: getDynamicStyle,
-				  onEachFeature: onEachFeature
-				});
-				normalizedGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
-				  style: getDynamicStyle,
-				  onEachFeature: onEachFeature
-				});
-
-				rawGeojson.addTo(mymap);
-				mymap.fitBounds(rawGeojson.getBounds());
-						
 				// Crée les deux couches GeoJSON enrichies
 				rawGeojson = L.geoJson(baseGeojson.toGeoJSON(), {
 				  style: getDynamicStyle,
@@ -409,8 +396,8 @@
 				// Ajoute rawGeojson à la carte
 				rawGeojson.addTo(mymap);
 				mymap.fitBounds(rawGeojson.getBounds());
-
-				// Calcule les moyennes pour l'affichage initial
+				
+				// Calculer et afficher les moyennes dès le chargement
 				updateIndicateursComposites({
 				  features: rawGeojson.getLayers().map(l => ({ properties: l.feature.properties }))
 				});
@@ -421,16 +408,14 @@
 			  });
 			});
 
-		  document.getElementById("theme-select").addEventListener("change", (e) => {
-			populateIndicatorSelect(e.target.value);
+			document.getElementById("theme-select").addEventListener("change", (e) => {
+			  populateIndicatorSelect(e.target.value);
+			});
+			document.getElementById("indicator-select").addEventListener("change", (e) => {
+			  selectedIndicator = e.target.value || null;
+			  recolorMap();
+			});
 		  });
-		  document.getElementById("indicator-select").addEventListener("change", (e) => {
-			selectedIndicator = e.target.value || null;
-			recolorMap();
-		});
-		});
-
-
       var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
 
       var baselayers = {
