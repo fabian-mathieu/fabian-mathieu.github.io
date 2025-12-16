@@ -1127,16 +1127,7 @@ async function initCarteDeces() {
           map_deces.setLayoutProperty('Villages_2_anim', 'visibility', 'visible'); 
           map_deces.setFilter('Districts_fill_static', districtFilter);
           map_deces.setFilter('borders_all_static', null); 
-          map_deces.setFilter(
-  'Villages_2_anim',
-  [
-    'match',
-    ['get', 'shapeName'],
-    activeDistrictNames,
-    true,
-    false
-  ]
-);
+          map_deces.setFilter('Villages_2_anim', ['in', ['get', 'shapeName'], ...activeDistrictNames]); 
       }
 
       selectElement.addEventListener('change', (event) => {
