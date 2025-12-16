@@ -432,10 +432,10 @@ function initCarteEvolution() {
   const evo_annees = [2017, 2018, 2019, 2020, 2021];
 
   const evo_coords = [
-    [105.36, -6.11], // haut gauche
-    [105.50, -6.11], // haut droit
-    [105.50, -6.25], // bas droit
-    [105.36, -6.25]  // bas gauche
+    [105.405, -6.08], // haut gauche
+    [105.44, -6.08], // haut droit
+    [105.44, -6.11], // bas droit
+    [105.405, -6.11]  // bas gauche
   ];
 
   const evo_slider = document.getElementById("timeline");
@@ -470,8 +470,8 @@ function initCarteEvolution() {
 
   const evo_map = new maplibregl.Map({
     container: 'evolution-map',
-    center: [105.43, -6.18],
-    zoom: 11,
+    center: [105.42, -6.095],
+    zoom: 13.3,
     style: {
       version: 8,
       sources: {
@@ -878,6 +878,12 @@ async function initCarteDeces() {
       //-------------------------------------------------------------------
       // 6) VILLAGES
       //-------------------------------------------------------------------
+      
+      function showAllVillagesFinal() {
+        // Supprimer tout filtre = afficher tous les villages
+        map_deces.setFilter('Villages_2_anim', null);
+        map_deces.setLayoutProperty('Villages_2_anim', 'visibility', 'visible');
+      }
 
       const villagesWithIndex = {
           ...Villages_2,
@@ -1074,9 +1080,14 @@ async function initCarteDeces() {
 
               console.log("--- Animation séquentielle terminée ---");
               toggleAnimationLayers(false);
-              
-              // Appliquer l'état final de la carte avec le mode "ALL"
-              filterMapByDistrict('ALL'); 
+
+              // Afficher tous les villages définitivement
+              showAllVillagesFinal();
+
+              // Repasser les districts en mode statique
+              map_deces.setLayoutProperty('Districts_fill_static', 'visibility', 'visible');
+              map_deces.setLayoutProperty('labels_morts_anim', 'visibility', 'visible');
+
           }
       }
 
@@ -1127,7 +1138,10 @@ async function initCarteDeces() {
           map_deces.setLayoutProperty('Villages_2_anim', 'visibility', 'visible'); 
           map_deces.setFilter('Districts_fill_static', districtFilter);
           map_deces.setFilter('borders_all_static', null); 
-          map_deces.setFilter('Villages_2_anim', ['in', ['get', 'shapeName'], ...activeDistrictNames]); 
+          /*map_deces.setFilter('Villages_2_anim', ['in', ['get', 'shapeName'], ...activeDistrictNames]);
+          map_deces.setFilter('Villages_2_anim', ['match', ['get', 'shapeName'], activeDistrictNames, true, false]); */
+          map_deces.setFilter('Villages_2_anim', null);
+
       }
 
       selectElement.addEventListener('change', (event) => {
@@ -1206,6 +1220,9 @@ async function initCarteDeces() {
           });
       });
   });
+
+
+
 
 }
 
