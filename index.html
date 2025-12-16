@@ -2,783 +2,327 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Mobilités durables">
+  <meta name="description" content="L'éruption du Krakatoa de 1883">
   <meta name="author" content="Fabian MATHIEU">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
-  <title>Tableau de bord - Indicateurs de mobilité</title>
+  <title>Krakatoa</title>
   <link rel="icon" type="image/x-icon" href="img/icon.png">
+  <!-- Extension : Turf-->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src='https://unpkg.com/@turf/turf@6.5.0/turf.min.js'></script>
+  <!-- CSS-->
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- charger les données du .csv -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Extension : MapLibre -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.js"></script>
+  <!-- MapLibre Compare -->
+  <script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-compare@0.5.0/dist/maplibre-gl-compare.js"></script>
+  <link rel="stylesheet" href=https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-compare@0.5.0/dist/maplibre-gl-compare.css>
+  <!-- Javascript-->
+  <script src="script.js" defer></script>
 </head>
 
 <body>
+
+  <!-- Header -->
   <header>
     <div class="pnr">
-      <a href="index.html"><img class="logo" src="img/clipboard-data_blue.svg" width="64" height="105"></a>
-      <h1><a href="index.html">Tableau de bord - Mobilités durables dans l'EMS</a></h1>
+      <a href="index.html"><img class="logo" src="img/logo.svg" width="64" height="105"></a>
+      <h1><a href="index.html">L'éruption du Krakatoa (1883)</a></h1>
     </div>
+
+    <!-- Affichage des onglets -->
     <nav class="nav">
-      <ul class="ul">
-        <li class="active"><a href="index.html"><img src="img/house_white.svg" width="16" height="16">Accueil</a></li>
-        <li><a href="a_propos.html"><img src="img/info_blue.svg" width="16" height="16">À propos</a></li>
+      <ul id="tabs">
+        <li data-tab="presentation" class="active">Présentation</li>
+        <li data-tab="historique">Historique</li>
+        <li data-tab="carte-son">Carte sons</li>
+        <li data-tab="carte-tsunami">Carte tsunami</li>
+        <li data-tab="carte-deces"> Carte décès</li>
+        <li data-tab="avant-apres"> Avant/Après</li>
+        <li data-tab="carte-evolution">Carte évolution</li>
       </ul>
     </nav>
+
   </header>
 
+  <!-- Contenus des onglets -->
   <main>
-  
-    <h1>Indicateurs à l'échelle de l'EMS</h1>
-	
-	<!-- Section pour les indicateurs composites -->
-    <div class="indicateurs-container" style="margin: 20px 2%; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/person_walking_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Marche</div>
-          <div class="progress-bar" id="marche-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+    <div id="tab-content">
+
+      <!-- Onglet par défaut - Présentation -->
+      <div id="presentation" class="tab active">
+        <h2>Localisation du volcan de Krakatoa</h2>
+          <p> 
+            Bienvenue sur cette exploration de l'éruption du volcan Krakatoa en 1883.
+          </p>
+        <div class="presentation-layout">
+          <!-- Carte globe -->
+          <div class="presentation-map">
+            <div id="presentation-map" class="map"></div>
           </div>
-          <div id="marche-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+          <!-- Légende-->
+          <div class="map-legend top-right" id="presentation-legend">
+            <div class="map-legend-inner">
+              <div class="legend-title">Légende</div>
+
+              <div class="legend-item">
+                <span class="legend-icon legend-krakatoa"></span>
+                <span>Localisation du Krakatoa</span>
+              </div>
+            </div>
+          </div>
+          <!-- Diaporama -->
+          <div class="presentation-slideshow">
+            <div class="slideshow-container">
+              <div class="mySlide fade">
+                <img src="img/photo_1.jpg" alt="">
+                <div class="slide-caption">
+                  <strong>L'Anak Krakatau, le 20 octobre 2013</strong><br>
+                  Photographie - 2013<br>
+                  Source : Wikimedia - CC BY-SA 3.0
+                </div>
+              </div>
+
+              <div class="mySlide fade">
+                <img src="img/photo_2.jpg" alt="">
+                <div class="slide-caption">
+                  <strong>Éruption du Krakatoa (1883)</strong><br>
+                  Photographie - 1883<br>
+                  Source : Wikimedia - Domaine Public
+                </div>
+              </div>
+              <div class="mySlide fade">
+                <img src="img/photo_3.jpg" alt="">
+                <div class="slide-caption">
+                  <strong>Éruption du Krakatoa (1883)</strong><br>
+                  Lithographie par Parker & Coward - 1888<br>
+                  Source : Wikimedia - Domaine Public
+                </div>
+              </div>
+
+              <div class="mySlide fade">
+                <img src="img/photo_4.jpg" alt="">
+                <div class="slide-caption">
+                  <strong>Énorme bloc de corail à l'emplacement de l'ancienne poste d'Anyer (Indonésie) détruite après l'éruption du Krakatoa</strong><br>
+                  Photographie - 1885<br>
+                  Source : Wikimedia / Collectie Wereldmuseum - CC BY-SA 3.0
+                </div>
+              </div>
+
+              <div class="mySlide fade">
+                <img src="img/photo_5.jpg" alt="">
+                <div class="slide-caption">
+                  <strong>Éruption du Krakatoa (2008)</strong><br>
+                  Photographie - 2008<br>
+                  Source : Wikimedia - Domaine Public
+                </div>
+              </div>
+
+              <a class="prev">❮</a>
+              <a class="next">❯</a>
+            </div>
+
+            <div class="dots">
+              <span class="dot" data-slide="1"></span>
+              <span class="dot" data-slide="2"></span>
+              <span class="dot" data-slide="3"></span>
+              <span class="dot" data-slide="4"></span>
+              <span class="dot" data-slide="5"></span>
+            </div>
+
+          </div>
         </div>
       </div>
 
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/bicycle_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Vélos</div>
-          <div class="progress-bar" id="velos-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+      <!-- Contenu de l’onglet Historique -->
+      <div id="historique" class="tab">
+        <h2>Historique</h2>
+        <p>Texte historique, images, documents…</p>
+      </div>
+
+      <!-- Contenu de l'onglet Carte Son -->
+      <div id="carte-son" class="tab">
+        <h2>Propagation du son du Krakatoa (1883)</h2>
+
+        <div id="map" class="map"></div>
+
+        <div class="map-legend top-right" id="sound-legend">
+          <div class="map-legend-inner">
+            <div class="legend-title">Légende</div>
+            <div class="legend-item">
+              <span class="legend-icon legend-krakatoa"></span>
+              <span>Localisation du Krakatoa</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon legend-lieux"></span>
+              <span>Lieux où le son fut entendu</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line legend-cercle"></span>
+              <span>Front de propagation du son</span>
+            </div>
           </div>
-          <div id="velos-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+
+        <div class="map-overlay top">
+          <div class="map-overlay-inner">
+            <h3>Propagation du son</h3>
+            <label id="time-label" for="time-slider">0 min (rayon: 0 km)</label>
+            <input id="time-slider" type="range">
+          </div>
         </div>
       </div>
 
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/bus-front_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Bus</div>
-          <div class="progress-bar" id="bus-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+      <!-- Contenu de l'onglet Carte Tsunami -->
+      <div id="carte-tsunami" class="tab">
+        <h2>Impact du tsunami provoqué par l'éruption</h2>
+        <div id="tsunami-map" class="map"></div>
+
+        <div class="map-legend" id="tsunami-legend">
+          <div class="map-legend-inner">
+            <div class="legend-title">Légende</div>
+
+            <div class="legend-item">
+              <span class="legend-icon legend-krakatoa"></span>
+              <span>Localisation du Krakatoa</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-icon legend-zone-verbeek"></span>
+              <span>Zones submergées (Verbeek, 1885)</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-icon legend-zone-principale"></span>
+              <span>Zones submergées (Clerc-Rampal, 1913)</span>
+            </div>
           </div>
-          <div id="bus-value" style="text-align: center; font-size: 0.8em;">0.00</div>
         </div>
       </div>
 
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/lightrail_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Tram</div>
-          <div class="progress-bar" id="tram-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+      <!-- Contenu de l'onglet Carte décès-->
+      <div id="carte-deces" class="tab">
+        <h2>Localisation des morts suite à l'éruption</h2>
+        <div id="map_deces" class="map"></div>
+
+        <div class="map-overlay top carte-deces-overlay">
+          <div class="map-overlay-inner">
+            <h3>Sélection du district</h3>
+            <select id="district-select">
+              <option value="ALL">Afficher tout</option>
+            </select>
           </div>
-          <div id="tram-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+        </div>
+
+        <div class="map-legend top-right carte-deces-legend">
+          <div class="map-legend-inner">            
+
+            <p style="font-weight: bold;">Nombre de décès</p>
+            <div class="legend-item">
+                <div class="legend-color legend-morts-1"></div>
+                <span>1 à 10</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-morts-2"></div>
+                <span>11 à 500</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-morts-3"></div>
+                <span>501 à 5 000</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-morts-4"></div>
+                <span>5 001 à 15 000</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-morts-5"></div>
+                <span>20 000 et +</span>
+            </div>
+
+            <hr style="border-top: 1px solid rgba(255, 255, 255, 0.3); margin: 10px 0;">
+            
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4bd1e6ff; border-radius: 10%; border: 1px solid #000000;"></div>
+                <span>Villages totalement ou partiellement détruits</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/car-front-fill_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Véhicules légers</div>
-          <div class="progress-bar" id="vl-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
-          </div>
-          <div id="vl-value" style="text-align: center; font-size: 0.8em;">0.00</div>
-        </div>
-      </div>
+      <!-- Contenu de l’onglet Avant/Après -->
+      <div id="avant-apres" class="tab">
+        <h2>Évolution de l’archipel du Krakatoa après l’éruption de 1883</h2>
+          <p>
+            Cette carte compare l’archipel du Krakatoa <strong>avant</strong> et
+            <strong>après</strong> l’éruption de 1883 grâce à un
+            <strong>slider interactif</strong>.  
+            Glisse la barre verticale pour voir la différence entre les deux états.
+        </p>
 
-      <div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/car-sharing_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Autopartage</div>
-          <div class="progress-bar" id="autopartage-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
-          </div>
-          <div id="autopartage-value" style="text-align: center; font-size: 0.8em;">0.00</div>
+      <div id="wrapper">
+        <!-- Conteneur pour le plugin de comparaison -->
+        <div id="comparison-container">
+          <div id="before"></div>
+          <div id="after"></div>
         </div>
-      </div>
 
-	
-	<div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/network_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Diversité fonctionnelle</div>
-          <div class="progress-bar" id="diversite_fonctionnelle-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+        <aside>
+          <h2>Lecture de la carte</h2>
+          <p>
+            La partie <strong>gauche</strong> montre l’archipel
+            <strong>avant 1883</strong>, la partie <strong>droite</strong> après
+            l’éruption. Tu peux zoomer, te déplacer et cliquer sur les polygones
+            pour obtenir quelques informations.
+          </p>
+
+          <h3>Légende</h3>
+          <div class="legend-item">
+            <span class="color-box pre"></span>
+            <span>Avant 1883</span>
           </div>
-          <div id="diversite_fonctionnelle-value" style="text-align: center; font-size: 0.8em;">0.00</div>
-        </div>
-      </div>
-	
-	<div class="indicateur-item" style="display: flex; align-items: center; min-width: 200px;">
-        <img src="img/go-to-work_blue.svg" width="24" height="24" style="margin-right: 10px;">
-        <div style="flex-grow: 1;">
-          <div>Schéma de mobilité</div>
-          <div class="progress-bar" id="schema_mobilite-progress">
-            <div style="height: 100%; width: 0%; background: #4CAF50;"></div>
+          <div class="legend-item">
+            <span class="color-box post"></span>
+            <span>Après 1883</span>
           </div>
-          <div id="schema_mobilite-value" style="text-align: center; font-size: 0.8em;">0.00</div>
-        </div>
+          <div class="legend-item">
+            <span class="color-box diff"></span>
+            <span>Différence (zones modifiées)</span>
+          </div>
+
+          <div class="controls">
+            <h3>Options d’affichage</h3>
+            <label>
+              <input type="checkbox" id="toggle-diff">
+              Afficher la couche de différence
+            </label>
+
+            <p class="small-note">
+              La couche de différence met en évidence les zones gagnées ou perdues
+              après l’éruption.
+            </p>
+          </div>
+        </aside>
       </div>
     </div>
-	
 
-    <div style="margin-left:2%; margin-bottom:10px;">
-      <button id="toggle-raw" class="data-toggle active">Données brutes</button>
-      <button id="toggle-normalized" class="data-toggle">Données normalisées</button>
+      <!-- Contenu de l'onglet Évolution-->  
+      <div id="carte-evolution" class="tab">
+        <h2>Évolution de l'île volcanique de Krakatoa (2017 → 2021)</h2>
+          <div id="evolution-map" class="map"></div>
+
+      <div class="map-overlay top">
+        <div class="map-overlay-inner">
+          <h3>Année sélectionnée</h3>
+            <span id="anneeAffichee">2017</span>
+          <input id="timeline" type="range" min="1" max="5" value="1">
+        </div>
+      </div>
+
     </div>
 
-	<div style="margin: 20px 2%;">
-	  <label for="theme-select">Thème :</label>
-	  <select id="theme-select">
-		<option value="">Choisir un thème</option>
-	  </select>
-
-	  <label for="indicator-select" style="margin-left: 20px;">Indicateur :</label>
-	  <select id="indicator-select" disabled>
-		<option value="">Choisir un indicateur</option>
-	  </select>
-	</div>
-	
-	<!-- Ajoute une zone pour l'affichage des sources -->
-	<div id="source-info" style="margin: 20px 2%; padding: 10px; background: #f9f9f9; border-left: 4px solid #2196F3; display: none;">
-	  <strong>Source(s) de l'indicateur :</strong>
-	  <ul id="source-list" style="margin-top: 5px; padding-left: 20px;"></ul>
-	</div>
-
-    <div id="mymap" style="height: 600px;"></div>
-
-    <script>
-	let selectedIndicator = null; // Indicateur sélectionné
-	
-	// Affichage du gradient pour les données brutes
-	function getBlueGradient(value, min, max) {
-	  if (value === -1 || value === null || value === undefined || isNaN(value)) {
-		return '#CCCCCC'; // données manquantes
-	  }
-
-	  const ratio = (value - min) / (max - min);
-	  const r = Math.round(230 - 130 * ratio); // de 230 à 100
-	  const g = Math.round(240 - 160 * ratio); // de 240 à 80
-	  const b = Math.round(255);              // fixe (bleu pur)
-
-	  return `rgb(${r},${g},${b})`;
-	}
-	
-	function getDynamicStyle(feature) {
-	  const props = feature.properties;
-
-	  if (!selectedIndicator || !(selectedIndicator in props)) {
-		return getBaseStyle(); // fallback
-	  }
-
-	  const value = props[selectedIndicator];
-
-	  // Si données normalisées : du rouge au vert
-		if (currentData === 'normalized') {
-		  if (value === -1 || value == null || isNaN(value)) return getMissingDataStyle();
-
-		  const r = Math.round(255 * (1 - value)); // 1 → rouge = 0
-		  const g = Math.round(255 * value);       // 1 → vert = 255
-		  const b = 0;
-
-		  return {
-			...getBaseStyle(),
-			fillColor: `rgb(${r},${g},${b})`
-		  };
-		}
-
-
-	  // Si données brutes : calcul min/max à partir du layer
-	  const allFeatures = rawGeojson ? rawGeojson.getLayers().map(l => l.feature) : [];
-	  const validValues = allFeatures.map(f => f.properties[selectedIndicator]).filter(v => v !== -1 && v != null && !isNaN(v));
-
-	  const min = Math.min(...validValues);
-	  const max = Math.max(...validValues);
-
-	  return {
-		...getBaseStyle(),
-		fillColor: getBlueGradient(value, min, max)
-	  };
-	}
-
-	function recolorMap() {
-	  if (!selectedIndicator) {
-		legend.update(null);
-		return;
-	  }
-
-	  if (currentData === 'raw' && rawGeojson) {
-		const features = rawGeojson.getLayers().map(l => l.feature);
-		const values = features.map(f => f.properties[selectedIndicator])
-		  .filter(v => v !== -1 && v != null && !isNaN(v));
-		const min = Math.min(...values);
-		const max = Math.max(...values);
-
-		rawGeojson.eachLayer(layer => {
-		  const style = getDynamicStyle(layer.feature);
-		  layer.setStyle(style);
-		});
-
-		legend.update(selectedIndicator, min, max, false);
-	  }
-
-	  if (currentData === 'normalized' && normalizedGeojson) {
-		normalizedGeojson.eachLayer(layer => {
-		  const style = getDynamicStyle(layer.feature);
-		  layer.setStyle(style);
-		});
-
-		legend.update(selectedIndicator, 0, 1, true);
-	  }
-	}
-
-	<!-- Script pour récupérer les données du .csv et afficher les thèmes et indicateurs -->
-	let labelDict = {};
-	let themeToIndicators = {};
-	let sourceDict = {};
-	let sourceMetaDict = {}; // contient les métadonnées du fichier tableau_sources_donnees.csv
-
-	  // Charger les sources à partir des deux CSV
-	function loadLabels() {
-	  return new Promise((resolve, reject) => {
-		Papa.parse("data/labels.csv", {
-		  download: true,
-		  header: true,
-		  complete: function(results) {
-			results.data.forEach(row => {
-			  const col = row.nom_colonne?.trim();
-			  const label = row.nom_complet?.trim();
-			  const themes = row.types_sources?.split(";").map(t => t.trim());
-			  const sources = row.nom_source?.split(";").map(s => s.trim()).filter(Boolean) || [];
-
-			  if (col && label) {
-				labelDict[col] = label;
-				sourceDict[col] = sources;
-
-				themes?.forEach(theme => {
-				  if (!themeToIndicators[theme]) {
-					themeToIndicators[theme] = [];
-				  }
-				  themeToIndicators[theme].push({ col, label });
-				});
-			  }
-			});
-
-			populateThemeSelect();
-			resolve();
-		  },
-		  error: reject
-		});
-	  });
-	}
-
-
-	  function loadSourceMetadata() {
-		return new Promise((resolve, reject) => {
-		  Papa.parse("data/tableau_sources_donnees.csv", {
-			download: true,
-			header: true,
-			delimiter: ";",
-			complete: function(results) {
-			  results.data.forEach(row => {
-				const nom = row.nom?.trim();
-				if (nom) {
-				  sourceMetaDict[nom] = {
-					description: row.description?.trim(),
-					derniere_maj: row.derniere_maj?.trim(),
-					url: row.url_informations?.trim()
-				  };
-				}
-			  });
-			  resolve();
-			},
-			error: reject
-		  });
-		});
-	  }
-
-	function updateSourcesForIndicator(indicatorKey) {
-	  const container = document.getElementById("source-info");
-	  const list = document.getElementById("source-list");
-	  list.innerHTML = "";
-
-	  if (!indicatorKey || !sourceDict[indicatorKey]) {
-		container.style.display = "none";
-		return;
-	  }
-
-	  const sources = sourceDict[indicatorKey];
-	  sources.forEach(src => {
-		const meta = sourceMetaDict[src];
-
-		const li = document.createElement("li");
-		li.style.marginBottom = "0.8em"; // éviter empilements visuels
-
-		if (meta) {
-		  li.innerHTML = `
-			<strong>${src}</strong> — ${meta.description || 'Pas de description'}<br>
-			<em>Dern. mise à jour :</em> ${meta.derniere_maj || 'inconnue'}<br>
-			${meta.url ? `<a href="${meta.url}" target="_blank">En savoir plus</a>` : ''}`;
-		} else {
-		  li.textContent = src;
-		}
-
-		list.appendChild(li);
-	  });
-
-	  container.style.display = "block";
-	}
-
-
-  // Charger les sources AVANT de gérer les changements d'indicateur
-	Promise.all([loadLabels(), loadSourceMetadata()]).then(() => {
-	  // Événement changement d'indicateur
-	  document.getElementById("indicator-select").addEventListener("change", (e) => {
-		selectedIndicator = e.target.value || null;
-		recolorMap();
-		updateSourcesForIndicator(selectedIndicator);
-	  });
-
-	  // Événement changement de thème
-	  document.getElementById("theme-select").addEventListener("change", (e) => {
-		populateIndicatorSelect(e.target.value);
-	  });
-
-	  // Chargement des couches de carte
-	  Promise.all([
-		loadEpciLayer(),
-		loadRawData()
-	  ]).then(([epci, rawData]) => {
-		epci.addTo(mymap);
-		rawData.addTo(mymap);
-		mymap.fitBounds(rawData.getBounds());
-	  });
-	});
-
-	
-	function populateThemeSelect() {
-	  const themeSelect = document.getElementById("theme-select");
-	  Object.keys(themeToIndicators).sort().forEach(theme => {
-		const option = document.createElement("option");
-		option.value = theme;
-		option.textContent = theme;
-		themeSelect.appendChild(option);
-	  });
-	}
-
-	function populateIndicatorSelect(theme) {
-	  const indicatorSelect = document.getElementById("indicator-select");
-	  indicatorSelect.innerHTML = `<option value="">Choisir un indicateur</option>`;
-
-	  if (!theme || !themeToIndicators[theme]) {
-		indicatorSelect.disabled = true;
-		return;
-	  }
-
-	  themeToIndicators[theme]
-		.sort((a, b) => a.label.localeCompare(b.label))
-		.forEach(({ col, label }) => {
-		  const option = document.createElement("option");
-		  option.value = col;
-		  option.textContent = label;
-		  indicatorSelect.appendChild(option);
-		});
-
-	  indicatorSelect.disabled = false;
-	}
-
-	
-	  <!-- Script pour l'affichage des moyennes -->
-	  // Fonction pour calculer et afficher les moyennes
-		function updateIndicateursComposites(data) {
-		  const indicators = {
-			marche: { sum: 0, count: 0 },
-			velos: { sum: 0, count: 0 },
-			bus: { sum: 0, count: 0 },
-			tram: { sum: 0, count: 0 },
-			vl: { sum: 0, count: 0 },
-			autopartage: { sum: 0, count: 0 },
-			diversite_fonctionnelle: { sum: 0, count: 0 },
-			schema_mobilite: { sum: 0, count: 0 }
-		  };
-
-		  // Accès aux champs dans le GeoJSON
-		  data.features.forEach(feature => {
-			const props = feature.properties;
-
-			const keys = {
-			  marche: 'ind_compose_marche',
-			  velos: 'ind_compose_velos',
-			  bus: 'ind_compose_bus',
-			  tram: 'ind_compose_tram',
-			  vl: 'ind_compose_vl',
-			  autopartage: 'ind_compose_autopartage',
-			  diversite_fonctionnelle: 'ind_diversite_fonctionnelle',
-			  schema_mobilite: 'ind_schema_mobilite'
-			};
-
-			for (const [key, field] of Object.entries(keys)) {
-			  const val = props[field];
-			  if (val !== -1 && val != null && !isNaN(val)) {
-				indicators[key].sum += val;
-				indicators[key].count++;
-			  }
-			}
-		  });
-
-		  // Mise à jour des barres de progression
-		  for (const [key, stats] of Object.entries(indicators)) {
-			const avg = stats.count > 0 ? stats.sum / stats.count : 0;
-			const percent = (avg * 100).toFixed(0);
-			const formatted = avg.toFixed(2);
-
-			const bar = document.getElementById(`${key}-progress`);
-			const value = document.getElementById(`${key}-value`);
-
-			if (bar && value) {
-			  bar.firstElementChild.style.width = `${percent}%`;
-			  value.textContent = formatted;
-			} else {
-			  console.warn(`Élément manquant pour ${key}`);
-			}
-		  }
-		}
-
-
-      // Chargement des données normalisées
-      function loadNormalizedData() {
-        return fetch('data/maille_200m_avec_donnees_normalise.geojson')
-          .then(response => response.json())
-          .then(data => {
-            if (normalizedGeojson) {
-              mymap.removeLayer(normalizedGeojson);
-            }
-            normalizedGeojson = L.geoJson(data, {
-              style: getBaseStyle,
-              onEachFeature: onEachFeature
-            });
-            
-            // Mise à jour des indicateurs composites
-            updateIndicateursComposites(data);
-            
-            return normalizedGeojson;
-          });
-      }
-
-
-      var mymap = L.map('mymap', { center: [47.1359, 2.12495], zoom: 13 });
-
-      var baselayers = {
-        fond_osm: L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }),
-        fond_carto: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '<a href="https://carto.com/basemaps">cartocdn</a>'
-        })
-      };
-      baselayers.fond_carto.addTo(mymap);
-
-      L.control.scale().addTo(mymap);
-      L.control.layers(baselayers, null, { position: 'topright' }).addTo(mymap);
-
-      let currentData = 'raw'; // 'raw' or 'normalized'
-      let rawGeojson, normalizedGeojson, epciLayer;
-
-      // Style pour les limites EPCI
-      function getEpciStyle() {
-        return {
-          color: '#000000',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0, // Transparent à l'intérieur
-          dashArray: null
-        };
-      }
-
-      // Style de base pour les mailles
-      function getBaseStyle() {
-        return {
-          weight: 0.5,
-          opacity: 1,
-          color: 'white',
-          dashArray: '3',
-          fillOpacity: 0.7,
-          fillColor: '#3388ff'
-        };
-      }
-
-      // Style pour les valeurs manquantes
-      function getMissingDataStyle() {
-        return {
-          weight: 0.5,
-          opacity: 1,
-          color: 'white',
-          dashArray: '3',
-          fillOpacity: 0.7,
-          fillColor: '#CCCCCC'
-        };
-      }
-
-      // Contrôle d'information
-      var info = L.control();
-      info.onAdd = function (map) {
-        this._div = L.DomUtil.create('div', 'info');
-        this.update();
-        return this._div;
-      };
-
-		info.update = function (props) {
-		  if (!props) {
-			this._div.innerHTML = '<h4>Indicateurs de mobilité</h4>Survolez un carreau';
-			return;
-		  }
-
-		  const id = props.idINSPIRE || '—';
-		  const type = currentData === 'raw' ? 'Brutes' : 'Normalisées';
-
-		  let indicateurTexte = '';
-		  if (selectedIndicator && selectedIndicator in props) {
-			const val = props[selectedIndicator];
-			const affichage = (val === -1 || val == null || isNaN(val)) ? 'N/A' : parseFloat(val).toFixed(2);
-			const nom = labelDict[selectedIndicator] || selectedIndicator;
-			indicateurTexte = `<br><b>${nom} :</b> ${affichage}`;
-		  }
-
-		  this._div.innerHTML = `
-			<h4>Indicateurs de mobilité</h4>
-			<b>ID carreau :</b> ${id}<br>
-			<b>Type de données :</b> ${type}
-			${indicateurTexte}
-			<br><small>Cliquez pour voir tous les indicateurs</small>
-		  `;
-		};
-
-      info.addTo(mymap);
-
-      // Fonctions pour gérer le survol
-      function highlightFeature(e) {
-        var layer = e.target;
-        layer.setStyle({
-          weight: 3,
-          color: '#FFFFFF',
-          dashArray: '',
-          fillOpacity: 0.9
-        });
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-          layer.bringToFront();
-        }
-        info.update(layer.feature.properties);
-      }
-
-      function resetHighlight(e) {
-        if (currentData === 'raw' && rawGeojson) {
-          rawGeojson.resetStyle(e.target);
-        } else if (currentData === 'normalized' && normalizedGeojson) {
-          normalizedGeojson.resetStyle(e.target);
-        }
-        info.update();
-      }
-
-      // Fonction pour chaque feature
-      function onEachFeature(feature, layer) {
-        layer.on({
-          mouseover: highlightFeature,
-          mouseout: resetHighlight,
-          click: function (e) {
-            layer.bindPopup(getPopupContent(feature.properties)).openPopup();
-          }
-        });
-      }
-      
-      // Création du contenu du popup
-		function getPopupContent(props) {
-		  if (!props) return '';
-
-		  let content = `<div style="max-width: 500px; max-height: 500px; overflow-y: auto;">
-			<h4>Détails du carreau (${currentData === 'raw' ? 'Données brutes' : 'Données normalisées'})</h4>
-			<b>ID :</b> ${props.idINSPIRE}<br><br>
-			<table style="width:100%; border-collapse: collapse;">
-			  <tr style="background-color: #f2f2f2;">
-				<th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Indicateur</th>
-				<th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Valeur</th>
-			  </tr>`;
-
-		  const sortedProps = Object.keys(props).sort();
-
-		  for (const key of sortedProps) {
-			if (key === 'idINSPIRE' || key === 'geometry') continue;
-
-			let value = props[key];
-			if (typeof value === 'number') {
-			  value = Number.isInteger(value) ? value : value.toFixed(2);
-			}
-
-			const isMissing = value === -1 || value === null || value === undefined;
-			const label = labelDict[key] || key; // nom lisible si défini dans labelDict
-
-			content += `
-			  <tr>
-				<td style="padding: 6px; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${label}</td>
-				<td style="padding: 6px; text-align: right; border-bottom: 1px solid #ddd; ${isMissing ? 'color: #999;' : ''}">${isMissing ? 'N/A' : value}</td>
-			  </tr>`;
-		  }
-
-		  content += `</table></div>`;
-		  return content;
-		}
-
-      // Chargement des limites EPCI
-      function loadEpciLayer() {
-        return fetch('data/limites_epci.geojson')
-          .then(response => response.json())
-          .then(data => {
-            epciLayer = L.geoJson(data, {
-              style: getEpciStyle,
-              interactive: false // Désactive les interactions pour cette couche
-            });
-            return epciLayer;
-          });
-      }
-
-      // Chargement des données brutes
-	function loadRawData() {
-	  return fetch('data/maille_200m_avec_donnees.geojson')
-		.then(response => response.json())
-		.then(data => {
-		  if (rawGeojson) {
-			mymap.removeLayer(rawGeojson);
-		  }
-		  rawGeojson = L.geoJson(data, {
-			style: getDynamicStyle,
-			onEachFeature: onEachFeature
-		  });
-		  return rawGeojson;
-		});
-	}
-
-
-      // Chargement des données normalisées
-	function loadNormalizedData() {
-	  return fetch('data/maille_200m_avec_donnees_normalise.geojson')
-		.then(response => response.json())
-		.then(data => {
-		  if (normalizedGeojson) {
-			mymap.removeLayer(normalizedGeojson);
-		  }
-		  normalizedGeojson = L.geoJson(data, {
-			style: getDynamicStyle, // utilise le style dynamique
-			onEachFeature: onEachFeature
-		  });
-
-		  // Mise à jour des indicateurs composites
-		  updateIndicateursComposites(data);
-
-		  return normalizedGeojson;
-		});
-}
-
-
-      // Basculer entre les données brutes et normalisées
-      function toggleData(type) {
-        currentData = type;
-        
-        // Mettre à jour les boutons
-        document.getElementById('toggle-raw').classList.toggle('active', type === 'raw');
-        document.getElementById('toggle-normalized').classList.toggle('active', type === 'normalized');
-        
-        // Charger les données si nécessaire et les afficher
-        if (type === 'raw') {
-          if (!rawGeojson) {
-            loadRawData().then(geojson => {
-              geojson.addTo(mymap);
-              mymap.fitBounds(geojson.getBounds());
-            });
-          } else {
-            if (normalizedGeojson) mymap.removeLayer(normalizedGeojson);
-            rawGeojson.addTo(mymap);
-			recolorMap();
-          }
-        } else {
-          if (!normalizedGeojson) {
-            loadNormalizedData().then(geojson => {
-              geojson.addTo(mymap);
-              mymap.fitBounds(geojson.getBounds());
-            });
-          } else {
-            if (rawGeojson) mymap.removeLayer(rawGeojson);
-            normalizedGeojson.addTo(mymap);
-          }
-        }
-      }
-
-      // Écouteurs d'événements pour les boutons
-      document.getElementById('toggle-raw').addEventListener('click', () => toggleData('raw'));
-      document.getElementById('toggle-normalized').addEventListener('click', () => toggleData('normalized'));
-
-		// Chargement initial
-		Promise.all([
-		  loadEpciLayer(),
-		  loadRawData()
-		]).then(([epci, rawData]) => {
-		  epci.addTo(mymap);
-		  rawData.addTo(mymap);
-		  mymap.fitBounds(rawData.getBounds());
-
-		  // Chargement immédiat des données normalisées pour calculer les moyennes
-		  fetch('data/maille_200m_avec_donnees_normalise.geojson')
-			.then(response => response.json())
-			.then(normalizedData => {
-			  updateIndicateursComposites(normalizedData);
-			});
-		});
-		
-		// Légende dynamique (ajoutée à droite)
-		var legend = L.control({ position: 'bottomright' });
-
-		legend.onAdd = function () {
-		  const div = L.DomUtil.create('div', 'info legend');
-		  div.style.background = 'white';
-		  div.style.padding = '10px';
-		  div.style.borderRadius = '5px';
-		  div.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
-		  div.innerHTML = '<b>Légende</b><br>—<br><i>Aucun indicateur</i>';
-		  this._div = div;
-		  return div;
-		};
-
-		legend.update = function (indicatorName, min, max, isNormalized) {
-		  if (!indicatorName) {
-			this._div.innerHTML = '<b>Légende</b><br>—<br><i>Aucun indicateur</i>';
-			return;
-		  }
-
-		  let scale = '';
-		  if (isNormalized) {
-			scale = `
-			  <div style="height: 10px; background: linear-gradient(to right, red, green); margin: 5px 0;"></div>
-			  <div style="display: flex; justify-content: space-between;">
-				<span>0</span><span>1</span>
-			  </div>`;
-		  } else {
-			scale = `
-			  <div style="height: 10px; background: linear-gradient(to right, rgb(230,240,255), rgb(100,80,255)); margin: 5px 0;"></div>
-			  <div style="display: flex; justify-content: space-between;">
-				<span>${min.toFixed(2)}</span><span>${max.toFixed(2)}</span>
-			  </div>`;
-		  }
-
-		  this._div.innerHTML = `<b>${labelDict[indicatorName] || indicatorName}</b><br>${scale}`;
-		};
-
-		legend.addTo(mymap);
-
-
-
-    </script>
   </main>
+  
 </body>
 </html>

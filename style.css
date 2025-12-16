@@ -1,25 +1,489 @@
-body{background-image:url("img/bg.png"); font-family:Georgia,serif; display:block; height:100%;}
-header{display:flex; align-items:center;}
-.pnr{display:flex; align-items:center;}
-.nav{margin-bottom:1em; width:100%}
-.ul{list-style:none;}
-.ul li a{margin-right:1em;}
-.pnr h1{margin-left:0.5em;}
-.ul li a:hover{background-color: #05050524; border-radius: 1.5em;}
-li a{float:left; padding:0.6em; font-size:1.2em; line-height:1.6em; border-radius:0.6em; color:#448aff; text-decoration:none;}
-li a img{margin-right:0.5em;}
-li.active a{background-color:#4488ff91; border-radius:1.5em; color:white;}
-header h1 a{color:#448aff; text-decoration:none;}
-main h1{font-size:150%; color:#5d6d7e; margin-left:2%;}
-#mymap{position:absolute;height:75%;width:95%;margin-left:2%;}
-.info {background:white;padding:0px 10px;border-radius:8px;box-shadow: 0 0 5px #ccc;max-height:400px;overflow-y:auto;max-width:300px;}
-.responsive-svg {width:100%;height:auto;display:block;}
-section{margin:2em auto; text-align:center;}
-pre{font-size:16px;}
-button:hover{background-color:#05050524;}
-.data-toggle {margin: 10px; padding: 8px 15px; color: black; border: none; border-radius: 4px;cursor: pointer;}
-.data-toggle.active {background: #448aff; color:white;}
-.leaflet-control.legend{font-size: 0.9em; line-height: 1.4em;}
-.progress-bar{height: 1.1em; background: #e0e0e0; margin-top: 5px}
-#source-list{display: grid;}
-#source-info a {float: none; padding: 0; font-size: 1em; line-height: 1.4em; border-radius: 0; color: #448aff; text-decoration: underline;}
+body{
+  background-image:url("img/bg.png"); 
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  color: #0e0e0e;
+ 
+  height:100%;
+}
+
+header{
+  display:flex; 
+  align-items:center;
+}
+
+.pnr{
+  display:flex; 
+  align-items:center;
+}
+  
+.nav{
+  width:100%
+}
+.pnr h1{
+  margin-left:0.2em;
+}
+
+header h1 a{
+  color:#4285eb; 
+  text-decoration:none;
+  font-size: 0.8em;
+}
+
+button:hover{
+  background-color:#05050524;
+}
+
+.tab.active h2,
+.tab.active h1 {
+  font-size: 1.5em;
+  color: #0e0e0e;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3em;
+}
+
+/* Cartes */
+.map{
+  width: 100%;
+  height: 70vh;
+}
+
+#slider-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 16px auto;
+  text-align: center;
+}
+
+.map-overlay, .map-legend {
+    font-size:0.9em;
+    position: absolute;
+    top: 10em;
+    left: 2em;
+    width: 16em;
+    z-index: 1;
+}
+
+.map-overlay .map-overlay-inner {
+    background-color: #ffffff;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+    padding: 0em 1em 1em 1em;
+    display: inline-grid;
+}
+
+.map-legend {
+  left: auto;
+  right: 2em;
+  width: 18em;
+}
+
+.map-legend-inner {
+    background: #fff;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.legend-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5em;
+}
+
+.legend-icon,
+.legend-line {
+    display: inline-block;
+    margin-right: 1em;
+}
+
+.legend-krakatoa {
+    width: 1em;
+    height: 1em;
+    background: #d91e18;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 1px rgba(0,0,0,0.5);
+}
+
+.legend-lieux {
+    width: 1em;
+    height: 1em;
+    background: #1967d2;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.legend-cercle{ /* Ligne orange = propagation */
+    width: 2em;
+    border-top: 3px solid #ff8f00;
+}
+
+.legend-info{ 
+    margin-top: 0.3em;
+    font-size: 0.9em;
+    color: #444;
+}
+
+.legend-zone-principale {
+  width: 1.2em;
+  height: 1.2em;
+  background: rgba(30,144,255,0.45);
+  border: 2px solid #1E90FF;
+}
+
+.legend-zone-verbeek {
+  width: 1.2em;
+  height: 1.2em;
+  background: rgba(255,94,0,0.4);
+  border: 2px solid #ff5e00;
+}
+
+
+/* Onglets */
+.nav {
+  width: 100%;
+  margin-top: 2em;
+  display: flex;
+  justify-content: flex-start;
+  transform: translateY(0.5em);
+}
+
+#tabs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 0.3em;
+}
+
+#tabs li {
+  padding: 0.6em 1.2em;
+  border: 1px solid #c3c3c3;
+  border-bottom: none;
+  background: #f0f0f0;
+  cursor: pointer;
+  font-size: 1.1em;
+  border-radius: 0.5em 0.5em 0 0;
+  white-space: nowrap;
+  transform: translateY(0);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Hover uniquement si non actif */
+#tabs li:not(.active):hover {
+  background: #cacaca;
+  transform: translateY(-0.4em);
+  box-shadow: 0  1em #cacaca;
+}
+
+#tabs li.active {
+  background: #ffffff;
+  font-size: 1.2em;
+  transform: translateY(-0.4em);
+  z-index: 3;
+}
+
+/* Contenu des onglets */
+.tab {
+  position: relative;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.tab.active {
+  font-size: 1.05em;
+  visibility: visible;
+  height: auto;
+  overflow: visible;
+  background: #ffffff;
+  padding: 0.5em 1em 1em 1em;
+  margin-top: -20px;
+  box-shadow: 0 1em 1em rgba(0,0,0,0.25);
+  position: relative;
+}
+
+#tabs li.active {
+  position: relative;
+  background: #ffffff;
+  font-weight: bold;
+  transform: translateY(-0.4em);
+  z-index: 5;
+  box-shadow: 0 1em 1em rgba(0,0,0,0.25);
+}
+
+/* Prolongement */
+#tabs li.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2.5em;
+  height: 2.5em;
+  background: #ffffff;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-right: 1px solid #c3c3c3;
+  border-left: 1px solid #c3c3c3;
+}
+
+/* Effet feuilles multiples */
+.tab.active::before { 
+  content: ""; 
+  position: absolute; 
+  top: 10px; 
+  left: 10px; 
+  width: 100%; 
+  height: 100%; 
+  background: #fafafa; 
+  box-shadow: 0 0 10px rgba(0,0,0,0.23); 
+  transform: rotate(-0.4deg); 
+  z-index: -4; 
+}
+
+.tab.active::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 3px;
+  width: 100%;
+  height: 100%;
+  background: #f4f4f4;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  transform: rotate(0.7deg);
+  z-index: -5;
+}
+
+/* ===== PRESENTATION ===== */
+
+.presentation-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+  margin-top: 1em;
+}
+
+.presentation-map .map {
+  height: 60vh;
+}
+
+#presentation .map-legend {
+  left: 2em;
+  right: auto;
+  top: 10em;
+  width: 16em;
+}
+
+/* Slideshow */
+.slideshow-container {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+.mySlide {
+  display: none;
+}
+
+.mySlide img {
+  width: 100%;
+  display: block;
+}
+
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  padding: 8px;
+  color: #000;
+  font-size: 22px;
+  background: rgba(255,255,255,0.8);
+  user-select: none;
+  transform: translateY(-50%);
+}
+
+.prev { left: 0; }
+.next { right: 0; }
+
+.dots {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+  margin: 0 3px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #333;
+}
+
+/* ===== SLIDESHOW FIXE ===== */
+
+.presentation-slideshow {
+  display: flex;
+  flex-direction: column;
+}
+
+.slideshow-container {
+  position: relative;
+  height: 60vh;              /* même hauteur que la carte */
+  overflow: hidden;
+  background: #000;
+}
+
+.mySlide {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.mySlide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #ffffff;
+}
+
+.slide-caption {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 0.8em 1em;
+  font-size: 0.9em;
+  color: #ffffff;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.75),
+    rgba(0,0,0,0.5),
+    rgba(0,0,0,0.25)
+  );
+  pointer-events: none;
+}
+
+/* ===== CARTE DÉCÈS ===== */
+
+.carte-deces-legend {
+  right: 2em;
+  top: 10em;
+  width: 18em;
+}
+
+.carte-deces-legend .legend-title {
+  font-size: 14px;
+}
+
+.carte-deces-legend .legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.4em;
+  font-size: 0.9em;
+}
+
+.carte-deces-legend .legend-color {
+  width: 1.4em;
+  height: 0.9em;
+  margin-right: 0.8em;
+  border: 1px solid #999;
+  border-radius: 2px;
+}
+.legend-morts-1   { background: #FCCDBB; }
+.legend-morts-2   { background: #F88D63; }
+.legend-morts-3   { background: #F44D08; }
+.legend-morts-4   { background: #C83F09; }
+.legend-morts-5   { background: #9C3107; }
+
+.legend-village {
+  background: #4bd1e6ff;
+  border-radius: 50%;
+  border: 1px solid #000;
+}
+
+.carte-deces-overlay {
+  top: 10em;
+  left: 2em;
+  width: 16em;
+}
+
+.carte-deces-overlay select {
+  margin-top: 0.4em;
+  padding: 6px;
+  font-size: 0.9em;
+}
+
+/* ===== AVANT / APRÈS ===== */
+
+#avant-apres #wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1rem;
+  margin-top: 1em;
+}
+
+#comparison-container {
+  position: relative;
+  width: 100%;
+  height: 550px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ccc;
+}
+
+#before,
+#after {
+  position: absolute;
+  inset: 0;
+}
+
+#avant-apres aside {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  font-size: 0.95em;
+}
+
+#avant-apres .color-box {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border: 1px solid #222;
+  border-radius: 2px;
+}
+
+.color-box.pre  { background: rgba(0,119,204,0.5); }
+.color-box.post { background: rgba(220,53,69,0.5); }
+.color-box.diff { background: rgba(255,193,7,0.5); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  #avant-apres #wrapper {
+    grid-template-columns: 1fr;
+  }
+  #comparison-container {
+    height: 420px;
+  }
+}
+
+/* Popup */
+.maplibregl-popup-content {
+  font-size: 0.85em;
+  padding: 6px 8px;
+}
