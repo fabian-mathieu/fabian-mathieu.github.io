@@ -187,6 +187,9 @@ function initCarteSon() {
 
   mapRegistry["carte-son"].map = map;
 
+  map.addControl(new maplibregl.FullscreenControl());
+  map.addControl(new maplibregl.NavigationControl());
+
   let krakatoa, lieux, polygone;
   let autoplayInterval = null;
 
@@ -378,6 +381,7 @@ function initCarteTsunami() {
 
   mapRegistry["carte-tsunami"].map = map;
 
+  map.addControl(new maplibregl.FullscreenControl());
   map.addControl(new maplibregl.NavigationControl());
 
   map.on('load', async () => {
@@ -405,8 +409,8 @@ function initCarteTsunami() {
       type: 'fill',
       source: 'tsunami_zones_verbeek',
       paint: {
-        'fill-color': '#ff5e00ff',
-        'fill-opacity': 0.4
+        'fill-color': '#ff0000ff',
+        'fill-opacity': 0.5
       }
     });
 
@@ -417,7 +421,7 @@ function initCarteTsunami() {
       source: 'tsunami_zones',
       paint: {
         'fill-color': '#1E90FF',
-        'fill-opacity': 0.45
+        'fill-opacity': 0.5
       }
     });
 
@@ -462,7 +466,6 @@ function initCarteEvolution() {
   // Insertion sous le slider
   evo_slider.parentNode.appendChild(controlsContainer);
 
-
   evo_slider.min = 1;
   evo_slider.max = evo_annees.length;
   evo_slider.value = 1;
@@ -494,6 +497,9 @@ function initCarteEvolution() {
   });
 
   mapRegistry["carte-evolution"].map = evo_map;
+
+  evo_map.addControl(new maplibregl.FullscreenControl());
+  evo_map.addControl(new maplibregl.NavigationControl());
 
   evo_map.on('load', () => {
 
@@ -588,8 +594,10 @@ function initPresentation() {
 
   const map = new maplibregl.Map({
     container: 'presentation-map',
-    center: [105.42403, -6.10020],
-    zoom: 1,
+    center: [0, 20],     // vue globale
+    zoom: 0.8,
+    bearing: 0,
+    pitch: 0,
     style: {
       version: 8,
       projection: { type: 'globe' },
@@ -612,8 +620,15 @@ function initPresentation() {
 
   mapRegistry.presentation.map = map;
 
+  map.addControl(new maplibregl.FullscreenControl());
+  map.addControl(new maplibregl.NavigationControl());
+
   map.on('load', () => {
-    map.addSource('volcan', { type: 'geojson', data: geojsonVolcan });
+
+    map.addSource('volcan', {
+      type: 'geojson',
+      data: geojsonVolcan
+    });
 
     map.addLayer({
       id: 'volcan-point',
@@ -627,11 +642,36 @@ function initPresentation() {
       }
     });
 
-    map.easeTo({
-      center: [105.42403, -6.10020],
-      zoom: 8,
-      duration: 5000
+    /* === ÉTAT INITIAL (IMMÉDIAT) === */
+    map.jumpTo({
+      center: [0, 20],
+      zoom: 1.5,
+      bearing: 0,
+      pitch: 0
     });
+
+    /* === IMPORTANT : forcer le resize réel === */
+    map.resize();
+
+    /* === Attendre que le canvas soit réellement prêt === */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        /* === FLY : Krakatoa === */
+        setTimeout(() => {
+          map.flyTo({
+            center: [105.42403, -6.10020],
+            zoom: 9,
+            bearing: 0,
+            pitch: 0,
+            speed: 0.6,
+            curve: 1,
+            essential: true
+          });
+        }, 0);
+
+      });
+    });
+
   });
 
   /* ========= DIAPORAMA ========= */
@@ -702,6 +742,9 @@ async function initCarteDeces() {
   });
 
   mapRegistry["carte-deces"].map = map_deces;
+
+  map_deces.addControl(new maplibregl.FullscreenControl());
+  map_deces.addControl(new maplibregl.NavigationControl());
 
   //-------------------------------------------------------------------
   // DISTRICTS 
@@ -1221,9 +1264,6 @@ async function initCarteDeces() {
       });
   });
 
-
-
-
 }
 
 /********************************************************************
@@ -1253,8 +1293,14 @@ function initAvantApres() {
     zoom: 9
   });
 
-  mapBefore.addControl(new maplibregl.NavigationControl(), "top-left");
-  mapAfter.addControl(new maplibregl.NavigationControl(), "top-left");
+  mapBefore.addControl(
+  new maplibregl.FullscreenControl({
+    container: document.getElementById("comparison-container")
+  })
+);
+
+  mapBefore.addControl(new maplibregl.NavigationControl());
+  mapAfter.addControl(new maplibregl.NavigationControl());
 
   let mapsLoaded = 0;
 

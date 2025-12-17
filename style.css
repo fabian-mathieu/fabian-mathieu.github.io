@@ -62,7 +62,7 @@ button:hover{
 .map-overlay, .map-legend {
     font-size:0.9em;
     position: absolute;
-    top: 10em;
+    top: 9.5em;
     left: 2em;
     width: 16em;
     z-index: 1;
@@ -77,7 +77,7 @@ button:hover{
 
 .map-legend {
   left: auto;
-  right: 2em;
+  right: 4em;
   width: 18em;
 }
 
@@ -143,8 +143,8 @@ button:hover{
 .legend-zone-verbeek {
   width: 1.2em;
   height: 1.2em;
-  background: rgba(255,94,0,0.4);
-  border: 2px solid #ff5e00;
+  background: rgba(255,0,0,0.5);
+  border: 2px solid #ff0000ff;
 }
 
 /* Onglets */
@@ -281,7 +281,7 @@ button:hover{
 #presentation .map-legend {
   left: 2em;
   right: auto;
-  top: 10em;
+  top: 9.5em;
   width: 16em;
 }
 
@@ -384,8 +384,8 @@ button:hover{
 /* ===== CARTE DÉCÈS ===== */
 
 .carte-deces-legend {
-  right: 2em;
-  top: 10em;
+  right: 4em;
+  top: 9.5em;
   width: 18em;
 }
 
@@ -420,7 +420,7 @@ button:hover{
 }
 
 .carte-deces-overlay {
-  top: 10em;
+  top: 9.5em;
   left: 2em;
   width: 16em;
 }
