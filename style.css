@@ -494,3 +494,43 @@ button:hover{
   font-size: 0.85em;
   padding: 6px 8px;
 }
+
+/* ===== HISTORIQUE ===== */
+
+.historique-frise {
+  margin: 1.5em auto;
+  text-align: center;
+}
+
+.historique-frise img {
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+.historique-frise figcaption {
+  font-size: 0.85em;
+  color: #444;
+  margin-top: 0.4em;
+}
+
+.historique-texte {
+  max-width: 900px;
+  margin: 2em auto 0 auto;
+  font-size: 1em;
+  line-height: 1.6;
+}
+
+.historique-texte h3 {
+  margin-top: 1.8em;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3em;
+}
+
+.historique-texte ul {
+  margin-left: 1.2em;
+}
+
+.historique-texte li {
+  margin-bottom: 0.4em;
+}
