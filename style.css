@@ -534,3 +534,39 @@ button:hover{
 .historique-texte li {
   margin-bottom: 0.4em;
 }
+
+/* ===== LÉGENDE – CARTE ÉVOLUTION ===== */
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 8px;
+  border: 1px solid rgba(0,0,0,0.4);
+}
+
+/* Couleurs spécifiques */
+.evolution-eau {
+  background-color: #3475D6;
+}
+
+.evolution-debris {
+  background-color: #213488;
+}
+
+.evolution-fumee {
+  background-color: #D3C2C2;
+}
+
+.evolution-vegetation {
+  background-color: #488211;
+}
+
+.evolution-lave {
+  background-color: #A02B0A;
+}
+
+.evolution-sol {
+  background-color: #AC7C41;
+}
